@@ -1,0 +1,260 @@
+/*
+ * Connector digambar murni dengan CSS pseudo-elements (Technical Design §4).
+ * Geometri: gap vertikal parent→child dibagi dua:
+ *   - ul.level::before  → stub vertikal turun dari parent (setengah atas)
+ *   - li.branch::after  → garis vertikal + horizontal di setengah bawah
+ * first/last/only-child hanya menghapus border-top yang tidak perlu.
+ */
+
+.chart {
+  overflow: auto;
+  padding: 16px;
+  font-family: var(--orgchart-font, system-ui, -apple-system, sans-serif);
+}
+
+.root,
+.level {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.root {
+  gap: 48px; /* jarak antar company (multi-root, FR-2) */
+  /* Centering yang aman untuk scroll container: width max-content + margin auto.
+     justify-content:center pada konten yang overflow membuat sisi kiri
+     tidak ter-scroll (scrollLeft tidak bisa negatif). */
+  width: max-content;
+  margin: 0 auto;
+}
+
+.level {
+  position: relative;
+  padding-top: var(--orgchart-gap-half, 20px);
+}
+
+/* Stub vertikal dari parent turun ke bar horizontal anak-anak */
+.level::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 0;
+  height: var(--orgchart-gap-half, 20px);
+  border-left: 2px solid var(--orgchart-line-color, #d0d5dd);
+}
+
+.branch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  padding: var(--orgchart-gap-half, 20px) 10px 0;
+}
+
+/* Root company tidak punya garis ke atas */
+.root > .branch {
+  padding-top: 0;
+}
+.root > .branch::before,
+.root > .branch::after {
+  display: none;
+}
+
+/* Setengah kiri bar horizontal */
+.branch::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 50%;
+  width: 50%;
+  height: var(--orgchart-gap-half, 20px);
+  border-top: 2px solid var(--orgchart-line-color, #d0d5dd);
+}
+
+/* Setengah kanan bar horizontal + garis vertikal turun ke kartu */
+.branch::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 50%;
+  height: var(--orgchart-gap-half, 20px);
+  border-top: 2px solid var(--orgchart-line-color, #d0d5dd);
+  border-left: 2px solid var(--orgchart-line-color, #d0d5dd);
+}
+
+/* Anak pertama: tidak ada bar ke kiri. Anak terakhir: tidak ada bar ke kanan.
+   Only-child = keduanya → tinggal garis vertikal lurus. */
+.branch:first-child::before {
+  border-top: none;
+}
+.branch:last-child::after {
+  border-top: none;
+}
+
+.nodeArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+/* Roving tabindex: fokus keyboard terlihat pada treeitem */
+.branch:focus-visible {
+  outline: none;
+}
+.branch:focus-visible > .nodeArea .card,
+.branch:focus-visible > .nodeArea > div:first-child {
+  outline: 2px solid var(--orgchart-focus-color, #2e90fa);
+  outline-offset: 2px;
+  border-radius: var(--orgchart-card-radius, 10px);
+}
+
+/* Highlight (search) — ring pada kartu */
+.highlighted {
+  outline: 2px solid var(--orgchart-highlight-color, #f79009);
+  outline-offset: 2px;
+  border-radius: var(--orgchart-card-radius, 10px);
+}
+
+/* ---- Zoom & pan (v2) ---- */
+
+.chartZoomable {
+  overflow: hidden;
+  padding: 0;
+}
+
+.zoomViewport {
+  position: relative;
+  overflow: hidden;
+  min-height: 320px;
+  touch-action: none;
+  cursor: grab;
+}
+.zoomViewport:active {
+  cursor: grabbing;
+}
+
+.zoomCanvas {
+  transform-origin: 0 0;
+  width: max-content;
+  padding: 16px;
+}
+
+.zoomControls {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.zoomControls button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--orgchart-card-border, #d0d5dd);
+  border-radius: 6px;
+  background: var(--orgchart-toggle-bg, #f9fafb);
+  color: var(--orgchart-toggle-fg, #475467);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+.zoomControls button:hover {
+  background: var(--orgchart-toggle-hover-bg, #eaecf0);
+}
+.zoomControls button:focus-visible {
+  outline: 2px solid var(--orgchart-focus-color, #2e90fa);
+  outline-offset: 1px;
+}
+
+/* ---- Kartu default (FR-9) — theming via custom properties (OQ-3) ---- */
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 140px;
+  max-width: 220px;
+  padding: 10px 14px;
+  background: var(--orgchart-card-bg, #ffffff);
+  border: 1px solid var(--orgchart-card-border, #d0d5dd);
+  border-radius: var(--orgchart-card-radius, 10px);
+  box-shadow: var(--orgchart-card-shadow, 0 1px 3px rgba(16, 24, 40, 0.08));
+}
+
+.avatar {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--orgchart-avatar-fg, #475467);
+  background: var(--orgchart-avatar-bg, #eaecf0);
+}
+
+.cardText {
+  min-width: 0;
+  text-align: left;
+}
+
+.cardName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--orgchart-name-color, #101828);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardTitle {
+  font-size: 12px;
+  color: var(--orgchart-title-color, #667085);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- Toggle expand/collapse (FR-4, FR-5) ---- */
+
+.toggle {
+  margin-top: -1px;
+  min-width: 24px;
+  height: 22px;
+  padding: 0 7px;
+  border: 1px solid var(--orgchart-card-border, #d0d5dd);
+  border-radius: 11px;
+  background: var(--orgchart-toggle-bg, #f9fafb);
+  color: var(--orgchart-toggle-fg, #475467);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.toggle:hover {
+  background: var(--orgchart-toggle-hover-bg, #eaecf0);
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--orgchart-focus-color, #2e90fa);
+  outline-offset: 1px;
+}
+
+.empty {
+  color: var(--orgchart-title-color, #667085);
+  text-align: center;
+  padding: 32px;
+}

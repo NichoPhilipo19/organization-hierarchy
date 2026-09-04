@@ -19,15 +19,16 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, 'src/lib/index.ts'),
       name: 'OrgHierarchyTree',
-      formats: ['es'],
-      fileName: 'index',
+      formats: ['es', 'cjs'],
+      // es -> index.js, cjs -> index.cjs (dual package, lihat package.json "exports")
+      fileName: (format) => (format === 'es' ? 'index.js' : 'index.cjs'),
     },
     rollupOptions: {
       external: ['react', 'react-dom', 'react/jsx-runtime'],
       output: {
         // Rollup strip 'use client' saat bundling — kembalikan lewat banner
         // supaya Next.js App Router tetap mengenali OrgChart sebagai Client Component.
-        banner: "'use client';",
+        banner: "'use client';\n",
       },
     },
   },

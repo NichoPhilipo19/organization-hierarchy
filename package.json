@@ -21,8 +21,18 @@
     "hierarchy",
     "typescript"
   ],
-  "main": "./dist-lib/index.js",
+  "main": "./dist-lib/index.cjs",
+  "module": "./dist-lib/index.js",
   "types": "./dist-lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist-lib/index.d.ts",
+      "import": "./dist-lib/index.js",
+      "require": "./dist-lib/index.cjs"
+    },
+    "./style.css": "./dist-lib/style.css",
+    "./package.json": "./package.json"
+  },
   "sideEffects": [
     "*.css"
   ],

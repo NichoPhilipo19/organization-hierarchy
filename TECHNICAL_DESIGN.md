@@ -221,13 +221,30 @@ Konsumen bisa theme via container tanpa menyentuh CSS module; kustomisasi strukt
 
 ---
 
+## 7b. Export PNG (PRD §12, FR-12)
+
+`OrgChartHandle.exportToPng(filename?: string): Promise<void>` — method imperatif baru di samping `expandAll`/`collapseAll`.
+
+**Apa yang di-capture:** elemen `<ul role="tree">` itu sendiri (referensi yang sama dengan `treeRef` yang sudah dipakai keyboard nav), **bukan** viewport `ZoomPane` dan **bukan** state scale/translate saat ini. Keputusan sadar, dua alasan:
+
+1. `treeRef` selalu menunjuk seluruh subtree yang *ter-render* (node visible saja — subtree collapsed memang tidak ada di DOM, FR-10), lepas dari apakah `zoomable` aktif, sedang di-scroll, atau sedang di-zoom/pan. Konsumen mau chart-nya utuh di file, bukan potongan yang kebetulan terlihat di viewport saat tombol export ditekan.
+2. `html-to-image` mengukur elemen target lewat `scrollWidth`/`scrollHeight`-nya sendiri, bukan `getBoundingClientRect()` — jadi transform CSS `scale(...)` pada *ancestor* (`ZoomPane`'s `.zoomCanvas`) tidak ikut mengecilkan/membesarkan hasil capture. Efeknya otomatis "print di resolusi natural", tanpa perlu API fit-to-screen tambahan atau reset zoom sebelum capture.
+
+Konsekuensinya: `exportToPng` tidak butuh opsi `fitContent` — hasilnya selalu penuh dan pada skala natural karena target capture memang bukan area yang di-zoom/pan. Trade-off yang diterima: kalau konsumen ingin file yang mencerminkan persis apa yang mereka lihat di layar (misal sudah di-crop ke satu subtree via scroll), itu di luar cakupan v1 — silakan `renderNode` custom + capture manual.
+
+**Kenapa `html-to-image` (bukan native `<canvas>` atau screenshot API):** menyerialisasi DOM asli (termasuk CSS custom properties theming §5b, kartu `renderNode` custom apa pun) ke SVG `foreignObject` lalu ke PNG — tidak butuh reimplementasi rendering kartu di canvas. Trade-off yang diketahui: font/gambar cross-origin tanpa CORS header bisa gagal ter-embed (canvas "tainted") — didokumentasikan di README, bukan ditangani otomatis (di luar kendali library).
+
+**Kenapa dynamic import, bukan dependency biasa:** `html-to-image` (~5.7 kB gzip) ditambahkan sebagai `dependencies` biasa di `package.json` (bukan devDependency — dia dipakai di runtime konsumen), tapi di-`import()` di dalam `exportImage.ts`, dipanggil hanya saat `exportToPng()` benar-benar dieksekusi. Bundler (Vite/Rollup/webpack) memisahkannya jadi chunk terpisah; konsumen yang tidak pernah memanggil `exportToPng` tidak mengunduh chunk itu sama sekali. Diverifikasi: `npm run build:lib` menghasilkan `index.js` (utama) + chunk kedua terpisah untuk `html-to-image` — lihat README §Performa untuk angka gzip sebelum/sesudah.
+
+**Error handling:** kalau `treeRef.current` masih `null` (chart belum mount — `data` kosong, atau method dipanggil sebelum render pertama), `exportToPng` reject dengan pesan jelas alih-alih diam-diam no-op atau crash di `html-to-image`.
+
 ## 8. Roadmap Setelah v1
 
 1. ~~**v1.1** — arrow-key navigation, `expandAll/collapseAll` via ref imperative handle.~~ ✅ **Selesai 15 Jul 2026** (§6; `OrgChartHandle` via `forwardRef` + `useImperativeHandle`, `setExpanded` di `useExpansion` menghormati controlled/uncontrolled).
 2. **v2** — ~~zoom & pan~~ ✅ **Selesai** (`ZoomPane.tsx`: wheel non-passive zoom-to-cursor, pointer-capture pan dengan threshold 4px + click suppression, tombol overlay ±/reset; opt-in via prop `zoomable`). Radial view (SVG renderer, shared hooks) **masih backlog**.
-3. **v2.1** — ~~search/highlight node~~ ✅ **Selesai** (prop `highlightedIds` + `state.isHighlighted` + helper `ancestorsOf()` untuk auto-expand path). Export PNG **masih backlog**.
+3. **v2.1** — ~~search/highlight node~~ ✅ **Selesai** (prop `highlightedIds` + `state.isHighlighted` + helper `ancestorsOf()` untuk auto-expand path). ~~Export PNG~~ ✅ **Selesai** (§7b; `OrgChartHandle.exportToPng()`, `html-to-image` dynamic import).
 4. Helper `fromNested()` (disebut §1) ✅ **Selesai** — `helpers.ts`, dengan unit test.
-5. **Backlog berikutnya:** radial view SVG, export PNG, publish npm (nama package = PRD OQ-1), visual regression test (Playwright) untuk connector CSS.
+5. **Backlog berikutnya:** radial view SVG, publish npm (nama package = PRD OQ-1), visual regression test (Playwright) untuk connector CSS.
 
 ---
 

@@ -8,6 +8,7 @@ Kesiapan publish npm, plus gap testing/CI yang dicatat di `ANALYSIS.md` §5.
 
 ### Added
 
+- `OrgChartHandle.exportToPng(filename?)` — export tree yang sedang ter-render (node visible saja, lepas dari zoom/pan saat ini) ke file PNG via `html-to-image`, di-dynamic-import supaya konsumen yang tidak memakainya tidak menanggung cost bundle-nya. Tombol "Export PNG" ditambah di demo. Lihat `TECHNICAL_DESIGN.md` §7b dan `PRD.md` §12 (FR-12).
 - `LICENSE` (MIT) dan metadata publish di `package.json`: `repository`, `homepage`, `bugs`, `author`, `keywords`, `sideEffects: ["*.css"]`.
 - `'use client'` di `OrgChart.tsx` buat kompatibilitas React Server Components / Next.js App Router. Dipertahankan lewat Rollup output banner supaya nggak ke-strip pas build.
 - Test buat `ZoomPane`: zoom in/out, reset, drag-to-pan, dan regresi `onClickCapture` vs `onNodeClick`. Sebelumnya belum ada test sama sekali buat interaksi ini.

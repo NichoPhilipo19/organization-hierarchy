@@ -25,7 +25,7 @@ import 'org-hierarchy-tree/style.css'; // wajib — CSS tidak ter-inject otomati
 
 ## Fitur
 
-Collapse/expand per node dengan badge jumlah bawahan · multiple roots (multi-company) · controlled & uncontrolled expand state · `renderNode` override penuh · validasi data kotor (orphan/cycle/duplicate) dengan laporan terstruktur · keyboard navigation sesuai pola WAI-ARIA tree · zoom & pan opsional · search highlight · `expandAll/collapseAll` via ref.
+Collapse/expand per node dengan badge jumlah bawahan · multiple roots (multi-company) · controlled & uncontrolled expand state · `renderNode` override penuh · validasi data kotor (orphan/cycle/duplicate) dengan laporan terstruktur · keyboard navigation sesuai pola WAI-ARIA tree · zoom & pan opsional · search highlight · `expandAll/collapseAll` via ref · export PNG via ref.
 
 ## Menjalankan demo
 
@@ -72,7 +72,7 @@ Punya data nested? `fromNested(nested)` mengonversinya sekali jalan.
 | `zoomable` | `boolean` | Zoom (scroll/tombol) & pan (drag). Default `false`. |
 | `emptyState` | `ReactNode` | Ditampilkan saat `data` kosong. |
 | `className` | `string` | Class tambahan pada container. |
-| `ref` | `Ref<OrgChartHandle>` | `{ expandAll(), collapseAll() }` |
+| `ref` | `Ref<OrgChartHandle>` | `{ expandAll(), collapseAll(), exportToPng(filename?) }` |
 
 ### Controlled vs uncontrolled
 
@@ -121,6 +121,19 @@ Kustomisasi struktural: pakai `renderNode`.
 Chart tetap render sebisanya; setiap masalah dilaporkan via `onDataError`: orphan → jadi root, cycle → satu parent-link diputus (node jadi root), duplicate id → yang pertama menang.
 
 ![Dirty data handling — orphan, cycle, duplicate tetap ter-render dengan laporan error](docs/demo-dirty.png)
+
+### Export PNG
+
+```tsx
+const chartRef = useRef<OrgChartHandle>(null);
+
+<button onClick={() => chartRef.current?.exportToPng('org-chart.png')}>
+  Export PNG
+</button>
+<OrgChart ref={chartRef} data={data} />;
+```
+
+Meng-capture tree yang sedang ter-render (node visible saja — subtree collapsed memang tidak di-render, jadi otomatis tidak ikut), pada resolusi natural, lepas dari state zoom/pan `ZoomPane` saat ini. Reject dengan error jika chart belum ter-mount (misal `data` kosong). Dipakai library kecil `html-to-image` yang di-*dynamic import* di dalam method itu sendiri — konsumen yang tidak pernah memanggil `exportToPng` tidak mengunduh dependency ini sama sekali (lihat TECHNICAL_DESIGN.md §7b).
 
 ## Performa (terukur, bukan klaim)
 

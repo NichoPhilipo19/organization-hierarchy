@@ -134,4 +134,12 @@ Sesuai aturan §9 ("fitur baru = PRD amendment"), scope berikut resmi ditambahka
 | Helper `fromNested()` | Design §1 | ✅ + test |
 | Component tests lapisan interaksi + benchmark NFR-1 | Temuan analisis | ✅ 32 test, angka terukur |
 
-Tetap **di luar scope** (backlog dengan pengingat): radial view SVG, export PNG, publish npm (OQ-1), RTL (OQ-2). Perilaku baru yang didefinisikan: `defaultExpandedDepth` diterapkan ulang saat `data` berubah pada mode uncontrolled (lihat Technical Design §7).
+Tetap **di luar scope** (backlog dengan pengingat): radial view SVG, publish npm (OQ-1), RTL (OQ-2). Perilaku baru yang didefinisikan: `defaultExpandedDepth` diterapkan ulang saat `data` berubah pada mode uncontrolled (lihat Technical Design §7).
+
+## 12. Amendment — Export PNG (5 September 2026)
+
+| Item | Asal | Status |
+|---|---|---|
+| US-12 — Sebagai developer, saya bisa memicu export chart yang sedang dirender ke file PNG dari tombol saya sendiri, tanpa menambah dependency yang dibayar konsumen yang tidak memakainya. | Backlog v1.1/v2 (§11) | ✅ |
+
+**FR-12** — `OrgChartHandle.exportToPng(filename?: string): Promise<void>` meng-capture tree yang sedang ter-render (node visible saja — subtree collapsed otomatis tidak ikut karena FR-10) dan memicu download file PNG. Implementasi pakai `html-to-image`, di-*dynamic import* di dalam method-nya sendiri sehingga konsumen yang tidak pernah memanggil `exportToPng` tidak menanggung cost bundle library tersebut (NFR-2 tetap terjaga — lihat Technical Design §Export).

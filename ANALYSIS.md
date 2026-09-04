@@ -129,3 +129,20 @@ Kerjain enam task dari prompt implementor, semuanya applicable.
 Satu hal yang belum rapi di build CJS: prologue `"use strict"` yang di-inject otomatis sama Rollup nempel langsung setelah banner `'use client';` tanpa baris baru (`"use client";"use strict";...`). Udah dicoba tambahin `\n` di akhir string banner, tapi Rollup nge-trim whitespace itu sebelum masukin prologue-nya sendiri. Nggak ngaruh ke fungsi — `require()` tetap jalan, dan directive yang beneran dibaca Next.js App Router/webpack ada di build ESM (`index.js`), bukan di `.cjs`-nya. Dibiarin gitu aja daripada nambahin plugin custom cuma buat benerin hal kosmetik di task opsional.
 
 Tiap task dicek ulang penuh (`npm test`, `tsc --noEmit`, `npm run build`, `npm run build:lib`) sebelum lanjut, dan masing-masing jadi commit sendiri — enam commit, lihat `git log`.
+
+## 8. Export PNG (5 September 2026)
+
+| PRD | Design | Kode | Test/Bukti | Status |
+|---|---|---|---|---|
+| FR-12 export PNG (PRD §12, US-12) | Technical Design §7b | `exportImage.ts` (`exportChartToPng`), `OrgChart.tsx` (`useImperativeHandle` → `exportToPng`), `types.ts` (`OrgChartHandle.exportToPng`) | 5 test: 3 unit (`exportImage.test.ts` — target null ditolak, `toPng` dipanggil dengan elemen+opsi benar lalu men-trigger download, error dari `html-to-image` di-propagate) + 2 component (`OrgChart.test.tsx` — export memanggil `html-to-image` dengan elemen `role="tree"` yang benar-benar ter-mount, reject saat `data` kosong) | ✅ |
+
+Ukuran `dist-lib` sebelum/sesudah (`npm run build:lib`, gzip):
+
+| Build | Sebelum | Sesudah |
+|---|---|---|
+| ESM (`index.js`, chunk utama) | 4.71 kB | 4.91 kB (+0.20 kB) |
+| ESM (`html-to-image`, chunk terpisah — hanya dimuat saat `exportToPng()` dipanggil) | — | 5.72 kB |
+| CJS (`index.cjs`, chunk utama) | 3.93 kB | 4.12 kB (+0.19 kB) |
+| CJS (`html-to-image`, chunk terpisah) | — | 5.25 kB |
+
+Chunk utama naik <0.2 kB gzip (overhead pemanggilan `import()` + wrapper). Biaya `html-to-image` (~5.7 kB gzip) sepenuhnya opt-in via dynamic import — konsumen yang tidak pernah memanggil `exportToPng` tidak mengunduhnya sama sekali, jadi NFR-2 (zero paid-by-default runtime dependency) tidak dilanggar. Verifikasi: `dist-lib/` menghasilkan chunk kedua terpisah untuk kedua format build.

@@ -3,8 +3,29 @@
   "version": "1.0.0",
   "description": "Reusable React org hierarchy tree component — flat data in, org chart out",
   "type": "module",
+  "license": "MIT",
+  "author": "Nicho Philipo",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NichoPhilipo19/organization-hierarchy.git"
+  },
+  "homepage": "https://github.com/NichoPhilipo19/organization-hierarchy#readme",
+  "bugs": {
+    "url": "https://github.com/NichoPhilipo19/organization-hierarchy/issues"
+  },
+  "keywords": [
+    "react",
+    "org-chart",
+    "organization-chart",
+    "tree",
+    "hierarchy",
+    "typescript"
+  ],
   "main": "./dist-lib/index.js",
   "types": "./dist-lib/index.d.ts",
+  "sideEffects": [
+    "*.css"
+  ],
   "files": [
     "dist-lib"
   ],

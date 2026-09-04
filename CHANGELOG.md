@@ -4,15 +4,15 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versi
 
 ## [Unreleased]
 
-Kesiapan publish npm + perbaikan gap testing/CI dari `ANALYSIS.md` §5.
+Kesiapan publish npm, plus gap testing/CI yang dicatat di `ANALYSIS.md` §5.
 
 ### Added
 
 - `LICENSE` (MIT) dan metadata publish di `package.json`: `repository`, `homepage`, `bugs`, `author`, `keywords`, `sideEffects: ["*.css"]`.
-- `'use client'` directive di `OrgChart.tsx` untuk kompatibilitas React Server Components (Next.js App Router) — dipertahankan lewat Rollup output banner supaya tidak ter-strip saat build.
-- Component test untuk `ZoomPane` (zoom in/out, reset, drag-to-pan, regresi `onClickCapture` vs `onNodeClick`) — sebelumnya nol coverage untuk interaksi utamanya.
-- `.github/workflows/ci.yml`: verifikasi (`tsc --noEmit`, test, build demo, build:lib) di setiap push (semua branch) dan setiap PR ke `main`, terpisah dari `deploy-demo.yml` yang tetap hanya menangani deploy GitHub Pages.
-- Link ke `PRD.md`/`TECHNICAL_DESIGN.md`/`ANALYSIS.md` dari README, dan `CHANGELOG.md` ini.
+- `'use client'` di `OrgChart.tsx` buat kompatibilitas React Server Components / Next.js App Router. Dipertahankan lewat Rollup output banner supaya nggak ke-strip pas build.
+- Test buat `ZoomPane`: zoom in/out, reset, drag-to-pan, dan regresi `onClickCapture` vs `onNodeClick`. Sebelumnya belum ada test sama sekali buat interaksi ini.
+- `.github/workflows/ci.yml` — jalan tiap push dan PR ke `main`, cuma verifikasi. `deploy-demo.yml` tetap yang pegang deploy Pages.
+- README sekarang link ke `PRD.md`, `TECHNICAL_DESIGN.md`, `ANALYSIS.md`, dan changelog ini sendiri baru ditambahin.
 
 ## [1.1.0] — 2026-08-06
 

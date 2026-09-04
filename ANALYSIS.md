@@ -2,7 +2,7 @@
 
 **Tanggal:** 15 Juli 2026 · **Artefak yang dianalisis:** [PRD.md](PRD.md), [TECHNICAL_DESIGN.md](TECHNICAL_DESIGN.md), source code `src/`
 
-Analisis ini memeriksa tiga hal: (1) apakah ketiga artefak konsisten satu sama lain, (2) apakah yang dijanjikan benar-benar terverifikasi, dan (3) kelemahan nyata yang tersisa — termasuk yang tidak terlihat dari luar. Ditulis untuk jujur, bukan untuk memuji diri sendiri.
+Analisis ini memeriksa tiga hal: apakah ketiga artefak konsisten satu sama lain, apakah yang dijanjikan benar-benar terverifikasi, dan kelemahan nyata yang tersisa, termasuk yang tidak kelihatan dari luar.
 
 ---
 
@@ -110,20 +110,22 @@ Urutan pengerjaan berikutnya berdasarkan rasio dampak/usaha:
 
 Kolom "untested" pada matriks §2 (FR-4/5/6/8/9) kini tertutup oleh 13 component test (jsdom). Fitur baru sesi ini: keyboard nav, `OrgChartHandle`, zoom & pan, `highlightedIds`, `fromNested()`, `ancestorsOf()` — tercatat di PRD §11 (amendment). Sisa yang menunggu: **verifikasi visual manual (T-5 / G1)** dan backlog radial view + npm publish.
 
-## 7. Addendum — Kesiapan Publish & CI (5 September 2026)
+## 7. Publish readiness & CI (5 September 2026)
 
-Enam task dari prompt implementor dikerjakan; semua applicable, tidak ada yang di-skip. Sebelum mulai, `node_modules` ternyata rusak (`@rollup/rollup-darwin-arm64` hilang, sisa dari beberapa proses `vite` yang crash — terlihat dari file `*.timestamp-*.mjs` yang menumpuk, sudah ter-`.gitignore`) — `npm install` memperbaikinya sebelum task manapun dijalankan.
+Kerjain enam task dari prompt implementor, semuanya applicable.
 
-| # | Task | Resolusi |
+`node_modules` sempat rusak sebelum mulai apa-apa: `@rollup/rollup-darwin-arm64` hilang, sisa dari proses `vite` yang crash duluan (kelihatan dari tumpukan file `*.timestamp-*.mjs`, sudah masuk `.gitignore`). `npm install` beresin itu dulu.
+
+| # | Task | Hasil |
 |---|---|---|
-| 1 | `LICENSE` + metadata publish | ✅ MIT atas nama Nicho Philipo; `package.json` dapat `repository`/`homepage`/`bugs`/`author`/`keywords`/`sideEffects` |
-| 2 | `'use client'` directive | ✅ Ditambah di `OrgChart.tsx`; Rollup men-strip directive comment saat bundling, jadi dikembalikan lewat `output.banner` di `vite.lib.config.ts` supaya benar-benar muncul di `dist-lib/index.js` (diverifikasi langsung dari hasil build, bukan cuma source) |
-| 3 | Test `ZoomPane` (nol → enam test) | ✅ `src/lib/ZoomPane.test.tsx`: kontrol zoom in/out/reset, transform tepat setelah klik, drag-to-pan, dan regresi `onClickCapture` (drag yang lewat sebuah node tidak memicu `onNodeClick` node itu, tapi klik biasa tetap memicu). jsdom tidak implementasi Pointer Capture API — di-stub minimal di `beforeAll` |
-| 4 | `.github/workflows/ci.yml` | ✅ Trigger `push` (semua branch) + `pull_request` ke `main`; hanya verifikasi (`tsc`, test, build, build:lib) — `deploy-demo.yml` tidak disentuh, tetap satu-satunya pemilik step deploy Pages |
-| 5 | README → link dokumen + `CHANGELOG.md` | ✅ Section baru setelah Roadmap; `CHANGELOG.md` (Keep a Changelog) merekonstruksi v1.0.0 (15 Juli 2026) dan v1.1.0 (6 Agustus 2026) dari `git log` + addendum §6, plus entry Unreleased untuk task 1–5 |
-| 6 (opsional) | Build CJS + `exports` field | ✅ `vite.lib.config.ts` → `formats: ['es', 'cjs']`, `fileName` per-format; `package.json` dapat `exports` (`types`/`import`/`require`), `main` diarahkan ke `.cjs`, `module` ke `.js`. Diverifikasi dengan `node -e "require('./dist-lib/index.cjs')"` **dan** `import('./dist-lib/index.js')` — dua-duanya sukses meng-ekspor 8 simbol yang sama |
-| 6 (opsional) | `@vitest/coverage-v8` + `test:coverage` | ✅ Ditambah sebagai devDependency (pin ke versi vitest yang sama, `2.1.9`), tanpa threshold (baseline, bukan gate sesuai instruksi). `src/lib` ≈ 97% stmts; laporan default juga mencakup `demo/`, `scripts/`, `dist-lib/` yang tidak relevan — tidak dikonfigurasi exclude karena task hanya minta baseline, bukan tuning laporan |
+| 1 | `LICENSE` + metadata publish | MIT atas nama Nicho Philipo. `package.json` dapat `repository`, `homepage`, `bugs`, `author`, `keywords`, `sideEffects`. |
+| 2 | `'use client'` directive | Ditambah di `OrgChart.tsx`. Rollup nge-strip comment directive pas bundling, jadi dikembalikan lewat `output.banner` di `vite.lib.config.ts` — dicek langsung di hasil `dist-lib/index.js`, bukan cuma di source. |
+| 3 | Test `ZoomPane` (nol jadi enam test) | `src/lib/ZoomPane.test.tsx`: zoom in/out/reset, drag-to-pan, dan regresi `onClickCapture` (drag yang lewat sebuah node nggak boleh mancing `onNodeClick` node itu, klik biasa tetap harus mancing). jsdom belum implementasi Pointer Capture API, jadi di-stub seadanya di `beforeAll`. |
+| 4 | `.github/workflows/ci.yml` | Jalan di setiap push (semua branch) dan tiap PR ke `main` — cuma verifikasi (`tsc`, test, dua build). `deploy-demo.yml` nggak disentuh, tetap satu-satunya yang deploy ke Pages. |
+| 5 | README → link dokumen + `CHANGELOG.md` | Section baru setelah Roadmap. Changelog nyusun ulang v1.0.0 dan v1.1.0 dari `git log` + addendum §6, plus entry Unreleased untuk task 1-5. |
+| 6 (opsional) | Build CJS + `exports` field | `vite.lib.config.ts` sekarang build `['es', 'cjs']`; `package.json` dapat `exports` map (types/import/require), `main` ke `.cjs`, `module` ke `.js`. Dicek `require()` dan `import()` dua-duanya resolve ke 8 export yang sama. |
+| 6 (opsional) | `@vitest/coverage-v8` + `test:coverage` | Pin ke versi vitest yang sama (2.1.9), belum ada threshold — ini baseline dulu, bukan gate. `src/lib` sekitar 97% statements. Laporan default ikut nyangkut `demo/`, `scripts/`, `dist-lib/` yang sebenernya nggak relevan, tapi nggak diutak-atik exclude-nya karena task ini cuma minta angka baseline. |
 
-**Catatan jujur, bukan disembunyikan:** pada build CJS, prologue `"use strict"` yang di-inject otomatis oleh Rollup menempel langsung setelah banner `'use client';` tanpa baris baru (`"use client";"use strict";...`) — sudah dicoba menambah `\n` di akhir string banner tapi Rollup men-trim whitespace itu sebelum insert prologue-nya sendiri. Ini kosmetik, bukan fungsional: `require()` tetap sukses, dan `'use client'` yang benar-benar dibaca Next.js App Router/webpack ada di build ESM (`index.js`), bukan di `.cjs`. Tidak dipaksakan fix lebih lanjut supaya tidak menambah plugin custom untuk masalah kosmetik pada task opsional.
+Satu hal yang belum rapi di build CJS: prologue `"use strict"` yang di-inject otomatis sama Rollup nempel langsung setelah banner `'use client';` tanpa baris baru (`"use client";"use strict";...`). Udah dicoba tambahin `\n` di akhir string banner, tapi Rollup nge-trim whitespace itu sebelum masukin prologue-nya sendiri. Nggak ngaruh ke fungsi — `require()` tetap jalan, dan directive yang beneran dibaca Next.js App Router/webpack ada di build ESM (`index.js`), bukan di `.cjs`-nya. Dibiarin gitu aja daripada nambahin plugin custom cuma buat benerin hal kosmetik di task opsional.
 
-Semua task diverifikasi dengan siklus penuh (`npm test`, `tsc --noEmit`, `npm run build`, `npm run build:lib`) setelah setiap task, dan setiap task di-commit terpisah (6 commit, bukan satu commit raksasa) — lihat `git log`.
+Tiap task dicek ulang penuh (`npm test`, `tsc --noEmit`, `npm run build`, `npm run build:lib`) sebelum lanjut, dan masing-masing jadi commit sendiri — enam commit, lihat `git log`.

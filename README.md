@@ -143,5 +143,5 @@ Radial view (SVG renderer, shared hooks) dan publish ke npm menyusul — lihat T
 
 - **[PRD.md](PRD.md)** — requirement & user stories (FR-x/NFR-x), termasuk scope yang sengaja ditahan (radial view, npm publish).
 - **[TECHNICAL_DESIGN.md](TECHNICAL_DESIGN.md)** — keputusan desain dan alasannya: kenapa flat array, kenapa CSS connector bukan SVG, kenapa logic dipisah dari view.
-- **[ANALYSIS.md](ANALYSIS.md)** — audit jujur yang melacak PRD → design → kode → test per ID, termasuk bug yang ditemukan & cara fix-nya, bukan cuma daftar fitur.
+- **[ANALYSIS.md](ANALYSIS.md)** — melacak PRD → design → kode → test per ID, dan nyatetin bug yang ditemukan sekaligus cara fix-nya.
 - **[CHANGELOG.md](CHANGELOG.md)** — riwayat perubahan per rilis.

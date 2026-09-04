@@ -138,3 +138,10 @@ Subtree collapsed tidak di-render ke DOM, jadi biaya mengikuti jumlah node *terl
 ## Roadmap
 
 Radial view (SVG renderer, shared hooks) dan publish ke npm menyusul — lihat TECHNICAL_DESIGN.md §8.
+
+## Dokumentasi
+
+- **[PRD.md](PRD.md)** — requirement & user stories (FR-x/NFR-x), termasuk scope yang sengaja ditahan (radial view, npm publish).
+- **[TECHNICAL_DESIGN.md](TECHNICAL_DESIGN.md)** — keputusan desain dan alasannya: kenapa flat array, kenapa CSS connector bukan SVG, kenapa logic dipisah dari view.
+- **[ANALYSIS.md](ANALYSIS.md)** — audit jujur yang melacak PRD → design → kode → test per ID, termasuk bug yang ditemukan & cara fix-nya, bukan cuma daftar fitur.
+- **[CHANGELOG.md](CHANGELOG.md)** — riwayat perubahan per rilis.

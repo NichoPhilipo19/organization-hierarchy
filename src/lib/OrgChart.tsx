@@ -11,6 +11,7 @@ import {
 import type { KeyboardEvent } from 'react';
 import { ChartProvider } from './ChartContext';
 import { Branch } from './TreeView';
+import { exportChartToPng } from './exportImage';
 import { useExpansion } from './useExpansion';
 import { useOrgTree } from './useOrgTree';
 import { ZoomPane } from './ZoomPane';
@@ -91,6 +92,8 @@ export const OrgChart = forwardRef<OrgChartHandle, OrgChartProps>(
       () => ({
         expandAll: () => setExpanded(new Set(parentIds)),
         collapseAll: () => setExpanded(new Set()),
+        exportToPng: (filename = 'org-chart.png') =>
+          exportChartToPng(treeRef.current, filename),
       }),
       [parentIds, setExpanded],
     );

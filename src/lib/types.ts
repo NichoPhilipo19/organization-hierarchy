@@ -54,6 +54,12 @@ export interface OrgChartHandle {
   expandAll(): void;
   /** Collapse semua node. */
   collapseAll(): void;
+  /**
+   * Export tree yang sedang ter-render (node visible saja, mengabaikan
+   * zoom/pan saat ini) ke file PNG. Menolak jika chart belum ter-mount
+   * (misal `data` kosong). (FR-12)
+   */
+  exportToPng(filename?: string): Promise<void>;
 }
 
 export interface OrgChartProps {

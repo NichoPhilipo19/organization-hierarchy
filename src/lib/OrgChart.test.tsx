@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createRef, useState } from 'react';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -237,5 +237,35 @@ describe('OrgChart — empty state', () => {
   it('renders custom emptyState', () => {
     render(<OrgChart data={[]} emptyState={<p>Kosong melompong</p>} />);
     expect(screen.getByText('Kosong melompong')).toBeInTheDocument();
+  });
+});
+
+describe('OrgChart — exportToPng (FR-12)', () => {
+  const { toPngMock } = vi.hoisted(() => ({ toPngMock: vi.fn() }));
+  vi.mock('html-to-image', () => ({ toPng: toPngMock }));
+
+  afterEach(() => {
+    toPngMock.mockReset();
+  });
+
+  it('exports the mounted tree element via html-to-image', async () => {
+    toPngMock.mockResolvedValue('data:image/png;base64,abc');
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    const ref = createRef<OrgChartHandle>();
+    render(<OrgChart ref={ref} data={data} />);
+
+    await act(() => ref.current!.exportToPng('team.png'));
+
+    expect(toPngMock).toHaveBeenCalledTimes(1);
+    const [target] = toPngMock.mock.calls[0]!;
+    expect((target as HTMLElement).getAttribute('role')).toBe('tree');
+  });
+
+  it('rejects when data is empty and the chart never mounted a tree', async () => {
+    const ref = createRef<OrgChartHandle>();
+    render(<OrgChart ref={ref} data={[]} />);
+
+    await expect(ref.current!.exportToPng()).rejects.toThrow(/not mounted/i);
+    expect(toPngMock).not.toHaveBeenCalled();
   });
 });

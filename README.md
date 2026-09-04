@@ -2,6 +2,8 @@
 
 Komponen React reusable untuk merender hierarchy organisasi dari **data flat** — org chart, reporting line, struktur multi-company. Zero runtime dependency (React sebagai peer), fully typed, ~5 kB gzip.
 
+**[🔗 Live demo](https://nichophilipo19.github.io/organization-hierarchy/)** — expand/collapse, search, zoom & pan langsung di browser.
+
 ![Org Hierarchy Tree — multi-company org chart](docs/demo.png)
 
 *Interaksi: expand/collapse, expand all, search + highlight, zoom & pan:*

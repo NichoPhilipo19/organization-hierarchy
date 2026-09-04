@@ -24,6 +24,11 @@ export default defineConfig({
     },
     rollupOptions: {
       external: ['react', 'react-dom', 'react/jsx-runtime'],
+      output: {
+        // Rollup strip 'use client' saat bundling — kembalikan lewat banner
+        // supaya Next.js App Router tetap mengenali OrgChart sebagai Client Component.
+        banner: "'use client';",
+      },
     },
   },
 });

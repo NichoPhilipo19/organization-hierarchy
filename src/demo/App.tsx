@@ -104,6 +104,15 @@ export function App() {
         <button onClick={() => chartRef.current?.expandAll()}>
           Expand all (via ref)
         </button>
+        <button
+          onClick={() =>
+            chartRef.current
+              ?.exportToPng('org-chart.png')
+              .catch((err: unknown) => console.error('Export gagal:', err))
+          }
+        >
+          Export PNG
+        </button>
         <span style={{ width: 16 }} />
         <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14 }}>
           <input

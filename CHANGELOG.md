@@ -15,6 +15,7 @@ Kesiapan publish npm, plus gap testing/CI yang dicatat di `ANALYSIS.md` §5.
 - `.github/workflows/ci.yml` — jalan tiap push dan PR ke `main`, cuma verifikasi. `deploy-demo.yml` tetap yang pegang deploy Pages.
 - README sekarang link ke `PRD.md`, `TECHNICAL_DESIGN.md`, `ANALYSIS.md`, dan changelog ini sendiri baru ditambahin.
 - Preset tema (`THEMES`, `THEME_ORDER`, `getThemeStyle()`) di-export dari lib: `default`, `saas`, `devDark`, `editorial`, `corporate`, `industrial`, `government`, `startup`, `ormas` — masing-masing cuma kumpulan nilai custom property `--orgchart-*`, jadi konsumen bisa pakai langsung atau bikin preset sendiri dengan bentuk yang sama tanpa menyentuh kode komponen. Demo dapat theme switcher yang persist pilihannya ke `localStorage`. Dua custom property baru (`--orgchart-avatar-radius`, `--orgchart-line-width`) ditambah di `OrgChart.module.css`, default-nya sama seperti sebelumnya jadi backward-compatible.
+- Demo: sebagian node di `sampleData` diberi `avatarUrl` dummy (SVG dari DiceBear, deterministic per id) — sengaja cuma sebagian, supaya kartu dengan foto vs kartu yang masih fallback ke inisial (`NodeCard`, FR-9) sama-sama kelihatan di live demo.
 
 ## [1.1.0] — 2026-08-06
 

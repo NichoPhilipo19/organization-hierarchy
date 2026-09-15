@@ -25,7 +25,7 @@ import 'org-hierarchy-tree/style.css'; // wajib — CSS tidak ter-inject otomati
 
 ## Fitur
 
-Collapse/expand per node dengan badge jumlah bawahan · multiple roots (multi-company) · controlled & uncontrolled expand state · `renderNode` override penuh · validasi data kotor (orphan/cycle/duplicate) dengan laporan terstruktur · keyboard navigation sesuai pola WAI-ARIA tree · zoom & pan opsional · search highlight · `expandAll/collapseAll` via ref · export PNG via ref.
+Collapse/expand per node dengan badge jumlah bawahan · multiple roots (multi-company) · controlled & uncontrolled expand state · `renderNode` override penuh · validasi data kotor (orphan/cycle/duplicate) dengan laporan terstruktur · keyboard navigation sesuai pola WAI-ARIA tree · zoom & pan opsional · search highlight · `expandAll/collapseAll` via ref · export PNG via ref · 9 preset tema siap pakai (`THEMES`) di atas theming lewat CSS custom properties.
 
 ## Menjalankan demo
 
@@ -113,6 +113,30 @@ Kartu default & connector membaca CSS custom properties — set di container man
   --orgchart-focus-color: #2e90fa;
 }
 ```
+
+**Preset tema** — 9 kombinasi siap pakai di-export dari lib (`THEMES`, `THEME_ORDER`, `getThemeStyle()`), masing-masing cuma kumpulan nilai custom property di atas:
+
+| Tema | Kesan |
+|---|---|
+| `default` | Tanpa styling tambahan (bawaan). |
+| `saas` | Aksen indigo, kartu bulat, shadow lembut. |
+| `devDark` | Dark mode, monospace, aksen emerald. |
+| `editorial` | Kertas hangat, judul serif, garis tipis. |
+| `corporate` | Navy & putih, formal. |
+| `industrial` | Beton & oranye safety, garis tebal. |
+| `government` | Putih & merah maroon, serif — gaya kop surat instansi. |
+| `startup` | Ungu-cyan, radius besar, shadow berwarna. |
+| `ormas` | Merah-putih + emas, judul tegas ala spanduk organisasi. |
+
+```tsx
+import { OrgChart, getThemeStyle } from 'org-hierarchy-tree';
+
+<div style={getThemeStyle('startup')}>
+  <OrgChart data={data} />
+</div>;
+```
+
+`getThemeStyle(id)` mengembalikan style object berisi custom property tema tersebut — taruh di container mana pun yang membungkus `<OrgChart>` (custom property mengalir lewat CSS inheritance ke elemen di dalamnya), atau ambil `THEMES[id].vars` langsung kalau mau digabung dengan style lain. Bikin tema sendiri tinggal buat object dengan bentuk yang sama (lihat type `ThemeId`/`OrgChartTheme`) — tidak perlu mengubah kode komponen sama sekali.
 
 Kustomisasi struktural: pakai `renderNode`.
 

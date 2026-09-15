@@ -1,14 +1,14 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
-import { OrgChart, ancestorsOf, idsUpToDepth, useOrgTree } from '../lib';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { OrgChartHandle, OrgNode, TreeError } from '../lib';
+import { ancestorsOf, idsUpToDepth, OrgChart, useOrgTree } from '../lib';
 import { dirtyData, sampleData } from './sample-data';
 import {
-  THEME_ORDER,
-  THEMES,
+  type ChartVarStyle,
   loadStoredTheme,
   storeTheme,
-  type ChartVarStyle,
+  THEME_ORDER,
+  THEMES,
   type ThemeId,
 } from './themes';
 
@@ -48,9 +48,7 @@ export function App() {
 
   // Controlled mode (US-4) — memungkinkan Expand all / Collapse all & search dari luar
   const { roots } = useOrgTree(data);
-  const [expanded, setExpanded] = useState<Set<string>>(() =>
-    idsUpToDepth(roots, 2),
-  );
+  const [expanded, setExpanded] = useState<Set<string>>(() => idsUpToDepth(roots, 2));
 
   const [selected, setSelected] = useState<OrgNode | null>(null);
   const [errors, setErrors] = useState<TreeError[]>([]);
@@ -78,9 +76,7 @@ export function App() {
     return new Set(
       data
         .filter(
-          (n) =>
-            n.name.toLowerCase().includes(q) ||
-            (n.title ?? '').toLowerCase().includes(q),
+          (n) => n.name.toLowerCase().includes(q) || (n.title ?? '').toLowerCase().includes(q),
         )
         .map((n) => n.id),
     );
@@ -94,10 +90,7 @@ export function App() {
     setExpanded((prev) => {
       const next = new Set(prev);
       for (const n of data) {
-        if (
-          n.name.toLowerCase().includes(qq) ||
-          (n.title ?? '').toLowerCase().includes(qq)
-        ) {
+        if (n.name.toLowerCase().includes(qq) || (n.title ?? '').toLowerCase().includes(qq)) {
           for (const anc of ancestorsOf(data, n.id)) next.add(anc);
         }
       }
@@ -160,14 +153,29 @@ export function App() {
           Org Hierarchy Tree — Demo
         </h1>
         <p style={{ margin: 0, color: theme.page.muted, fontSize: 14 }}>
-          Multi-company · collapse/expand · controlled state · dirty-data
-          handling · search · zoom &amp; pan · keyboard navigation (Tab lalu
-          arrow keys)
+          Multi-company · collapse/expand · controlled state · dirty-data handling · search · zoom
+          &amp; pan · keyboard navigation (Tab lalu arrow keys)
         </p>
       </header>
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: theme.page.muted }}>
+      <div
+        style={{
+          display: 'flex',
+          gap: 8,
+          marginBottom: 12,
+          flexWrap: 'wrap',
+          alignItems: 'center',
+        }}
+      >
+        <label
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            fontSize: 13,
+            color: theme.page.muted,
+          }}
+        >
           Tema:
           <select
             value={themeId}
@@ -188,6 +196,7 @@ export function App() {
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
         <button
+          type="button"
           onClick={() => switchDataset('clean')}
           disabled={dataset === 'clean'}
           style={dataset === 'clean' ? activeControlStyle : controlStyle}
@@ -195,6 +204,7 @@ export function App() {
           Dataset bersih (2 company, ±50 node)
         </button>
         <button
+          type="button"
           onClick={() => switchDataset('dirty')}
           disabled={dataset === 'dirty'}
           style={dataset === 'dirty' ? activeControlStyle : controlStyle}
@@ -202,16 +212,17 @@ export function App() {
           Dataset kotor (orphan/cycle/duplicate)
         </button>
         <span style={{ width: 16 }} />
-        <button onClick={() => setExpanded(new Set(allIds))} style={controlStyle}>
+        <button type="button" onClick={() => setExpanded(new Set(allIds))} style={controlStyle}>
           Expand all
         </button>
-        <button onClick={() => setExpanded(new Set())} style={controlStyle}>
+        <button type="button" onClick={() => setExpanded(new Set())} style={controlStyle}>
           Collapse all
         </button>
-        <button onClick={() => chartRef.current?.expandAll()} style={controlStyle}>
+        <button type="button" onClick={() => chartRef.current?.expandAll()} style={controlStyle}>
           Expand all (via ref)
         </button>
         <button
+          type="button"
           onClick={() =>
             chartRef.current
               ?.exportToPng('org-chart.png')
@@ -222,7 +233,15 @@ export function App() {
           Export PNG
         </button>
         <span style={{ width: 16 }} />
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, color: theme.page.text }}>
+        <label
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            fontSize: 14,
+            color: theme.page.text,
+          }}
+        >
           <input
             type="checkbox"
             checked={zoomable}
@@ -256,11 +275,10 @@ export function App() {
             fontSize: 13,
           }}
         >
-          <strong>{errors.length} data issue(s) ditemukan</strong> — chart tetap
-          dirender:
+          <strong>{errors.length} data issue(s) ditemukan</strong> — chart tetap dirender:
           <ul style={{ margin: '4px 0 0', paddingLeft: 18 }}>
-            {errors.map((e, i) => (
-              <li key={i}>
+            {errors.map((e) => (
+              <li key={`${e.type}:${e.message}`}>
                 [{e.type}] {e.message}
               </li>
             ))}
@@ -281,7 +299,9 @@ export function App() {
         >
           Node diklik: <strong>{selected.name}</strong>
           {selected.title ? ` — ${selected.title}` : ''}{' '}
-          <button onClick={() => setSelected(null)}>tutup</button>
+          <button type="button" onClick={() => setSelected(null)}>
+            tutup
+          </button>
         </div>
       )}
 

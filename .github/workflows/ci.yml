@@ -24,6 +24,8 @@ jobs:
 
       - run: pnpm exec tsc --noEmit
 
+      - run: pnpm exec biome check .
+
       - run: pnpm test -- --run
 
       - run: pnpm build

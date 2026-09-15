@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createRef, useState } from 'react';
+
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { createRef, useState } from 'react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { OrgChart } from './OrgChart';
 import type { OrgChartHandle, OrgNode } from './types';
 
@@ -14,8 +15,7 @@ const data: OrgNode[] = [
   { id: 'eng2', parentId: 'cto', name: 'Eng Two' },
 ];
 
-const item = (name: string) =>
-  screen.getByText(name).closest('[role="treeitem"]') as HTMLElement;
+const item = (name: string) => screen.getByText(name).closest('[role="treeitem"]') as HTMLElement;
 
 describe('OrgChart — uncontrolled toggle (FR-3/4/5/10)', () => {
   it('renders default depth 1: roots expanded, grandchildren hidden', () => {
@@ -39,9 +39,7 @@ describe('OrgChart — uncontrolled toggle (FR-3/4/5/10)', () => {
       screen.getByRole('button', { name: /collapse 2 direct reports of tee o/i }),
     ).toBeInTheDocument();
     // collapse lagi
-    await user.click(
-      screen.getByRole('button', { name: /collapse 2 direct reports of tee o/i }),
-    );
+    await user.click(screen.getByRole('button', { name: /collapse 2 direct reports of tee o/i }));
     expect(screen.queryByText('Eng One')).not.toBeInTheDocument();
   });
 });
@@ -56,20 +54,12 @@ describe('OrgChart — controlled mode (FR-6)', () => {
     // Semua collapsed
     expect(screen.queryByText('Tee O')).not.toBeInTheDocument();
 
-    await user.click(
-      screen.getByRole('button', { name: /expand 2 direct reports of cee o/i }),
-    );
+    await user.click(screen.getByRole('button', { name: /expand 2 direct reports of cee o/i }));
     expect(onChange).toHaveBeenCalledWith(new Set(['ceo']));
     // DOM tidak berubah sampai prop di-update (controlled sejati)
     expect(screen.queryByText('Tee O')).not.toBeInTheDocument();
 
-    rerender(
-      <OrgChart
-        data={data}
-        expandedIds={new Set(['ceo'])}
-        onExpandedChange={onChange}
-      />,
-    );
+    rerender(<OrgChart data={data} expandedIds={new Set(['ceo'])} onExpandedChange={onChange} />);
     expect(screen.getByText('Tee O')).toBeInTheDocument();
   });
 });
@@ -88,9 +78,7 @@ describe('OrgChart — renderNode (FR-8)', () => {
         )}
       />,
     );
-    expect(screen.getByTestId('custom-cto')).toHaveTextContent(
-      'Tee O|children:2|depth:1|hl:true',
-    );
+    expect(screen.getByTestId('custom-cto')).toHaveTextContent('Tee O|children:2|depth:1|hl:true');
     expect(screen.getByTestId('custom-cfo')).toHaveTextContent('hl:false');
   });
 });
@@ -105,9 +93,7 @@ describe('OrgChart — onNodeClick terpisah dari toggle (FR-4)', () => {
     expect(onClick).toHaveBeenCalledTimes(1);
     expect(onClick).toHaveBeenCalledWith(expect.objectContaining({ id: 'cto' }));
 
-    await user.click(
-      screen.getByRole('button', { name: /expand 2 direct reports/i }),
-    );
+    await user.click(screen.getByRole('button', { name: /expand 2 direct reports/i }));
     expect(onClick).toHaveBeenCalledTimes(1); // tidak bertambah
   });
 });
@@ -124,7 +110,9 @@ describe('OrgChart — onDataError (FR-7, regresi T-2)', () => {
       const [tick, setTick] = useState(0);
       return (
         <div>
-          <button onClick={() => setTick(tick + 1)}>rerender {tick}</button>
+          <button type="button" onClick={() => setTick(tick + 1)}>
+            rerender {tick}
+          </button>
           {/* callback inline — identitas berubah setiap render (pola paling umum) */}
           <OrgChart data={dirty} onDataError={(errs) => calls.push(errs)} />
         </div>
@@ -145,9 +133,7 @@ describe('OrgChart — data berubah (T-4)', () => {
     const user = userEvent.setup();
     const { rerender } = render(<OrgChart data={data} />);
     // Collapse root dulu supaya state internal ≠ default
-    await user.click(
-      screen.getByRole('button', { name: /collapse 2 direct reports of cee o/i }),
-    );
+    await user.click(screen.getByRole('button', { name: /collapse 2 direct reports of cee o/i }));
     expect(screen.queryByText('Tee O')).not.toBeInTheDocument();
 
     const dataB: OrgNode[] = [

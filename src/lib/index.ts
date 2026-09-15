@@ -1,19 +1,19 @@
-export { OrgChart } from './OrgChart';
-export { NodeCard } from './NodeCard';
 export { buildTree, idsUpToDepth } from './buildTree';
-export { fromNested, ancestorsOf } from './helpers';
-export { useOrgTree } from './useOrgTree';
-export { useExpansion } from './useExpansion';
-export { THEME_ORDER, THEMES, getThemeStyle } from './themes';
+export { ancestorsOf, fromNested } from './helpers';
+export { NodeCard } from './NodeCard';
+export { OrgChart } from './OrgChart';
+export type { ChartVarStyle, ChartVars, OrgChartTheme, ThemeId } from './themes';
+export { getThemeStyle, THEME_ORDER, THEMES } from './themes';
 export type {
-  OrgNode,
+  BuildTreeResult,
   NestedOrgNode,
-  TreeNode,
+  NodeState,
+  OrgChartHandle,
+  OrgChartProps,
+  OrgNode,
   TreeError,
   TreeErrorType,
-  BuildTreeResult,
-  NodeState,
-  OrgChartProps,
-  OrgChartHandle,
+  TreeNode,
 } from './types';
-export type { ThemeId, ChartVars, ChartVarStyle, OrgChartTheme } from './themes';
+export { useExpansion } from './useExpansion';
+export { useOrgTree } from './useOrgTree';

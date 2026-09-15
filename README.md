@@ -36,6 +36,7 @@ pnpm test           # 32 unit + component test
 pnpm bench      # benchmark buildTree & render
 pnpm build:lib  # → dist-lib/ (index.js + index.d.ts + style.css)
 pnpm visuals    # regenerate screenshot/GIF README (butuh npx playwright install chromium)
+pnpm check      # Biome: lint + format + organize imports (--write)
 ```
 
 ## Format data

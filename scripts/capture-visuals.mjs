@@ -3,10 +3,11 @@
  * dan frame GIF interaksi → docs/frames/*.png (dirakit jadi GIF via ffmpeg).
  * Jalankan: `vite build --base=./` dulu, lalu `node scripts/capture-visuals.mjs`.
  */
-import { chromium } from 'playwright';
+
 import { mkdirSync, readFileSync } from 'node:fs';
-import { resolve, extname } from 'node:path';
 import { createServer } from 'node:http';
+import { extname, resolve } from 'node:path';
+import { chromium } from 'playwright';
 
 const root = resolve(import.meta.dirname, '..');
 mkdirSync(resolve(root, 'docs/frames'), { recursive: true });
@@ -17,7 +18,7 @@ const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css
 const server = createServer((req, res) => {
   const path = req.url === '/' ? '/index.html' : req.url.split('?')[0];
   try {
-    const body = readFileSync(resolve(root, 'dist' + path));
+    const body = readFileSync(resolve(root, `dist${path}`));
     res.writeHead(200, { 'content-type': mime[extname(path)] ?? 'application/octet-stream' });
     res.end(body);
   } catch {
@@ -41,7 +42,10 @@ const browser = await chromium.launch();
 
   // Dirty data PNG
   await page.getByRole('button', { name: /dataset kotor/i }).click();
-  await page.getByRole('button', { name: /expand all$/i }).first().click();
+  await page
+    .getByRole('button', { name: /expand all$/i })
+    .first()
+    .click();
   await page.waitForSelector('[role="alert"]');
   await page.screenshot({ path: out('demo-dirty.png') });
   await page.close();
@@ -90,10 +94,7 @@ const browser = await chromium.launch();
       let c = el.parentElement;
       while (
         c &&
-        !(
-          c.scrollWidth > c.clientWidth &&
-          /(auto|scroll)/.test(getComputedStyle(c).overflowX)
-        )
+        !(c.scrollWidth > c.clientWidth && /(auto|scroll)/.test(getComputedStyle(c).overflowX))
       )
         c = c.parentElement;
       if (c) {

@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import s from './OrgChart.module.css';
 
 const MIN_SCALE = 0.25;
@@ -116,18 +116,10 @@ export function ZoomPane({ children }: { children: ReactNode }) {
         <button type="button" aria-label="Zoom in" onClick={() => zoomBy(1.25)}>
           +
         </button>
-        <button
-          type="button"
-          aria-label="Zoom out"
-          onClick={() => zoomBy(1 / 1.25)}
-        >
+        <button type="button" aria-label="Zoom out" onClick={() => zoomBy(1 / 1.25)}>
           −
         </button>
-        <button
-          type="button"
-          aria-label="Reset zoom"
-          onClick={() => setT({ x: 0, y: 0, k: 1 })}
-        >
+        <button type="button" aria-label="Reset zoom" onClick={() => setT({ x: 0, y: 0, k: 1 })}>
           ⟲
         </button>
       </div>

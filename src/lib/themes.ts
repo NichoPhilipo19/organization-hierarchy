@@ -81,7 +81,8 @@ export const THEMES: Record<ThemeId, OrgChartTheme> = {
   saas: {
     id: 'saas',
     label: 'Product / SaaS',
-    description: 'Aksen indigo, kartu bulat dengan shadow lembut — landing page komponen yang ramah.',
+    description:
+      'Aksen indigo, kartu bulat dengan shadow lembut — landing page komponen yang ramah.',
     fontHref: GF('family=Sora:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700'),
     vars: {
       '--orgchart-font': "'Plus Jakarta Sans', system-ui, sans-serif",
@@ -157,7 +158,8 @@ export const THEMES: Record<ThemeId, OrgChartTheme> = {
   corporate: {
     id: 'corporate',
     label: 'Corporate',
-    description: 'Navy & putih, rapi dan formal — untuk intranet perusahaan atau laporan enterprise.',
+    description:
+      'Navy & putih, rapi dan formal — untuk intranet perusahaan atau laporan enterprise.',
     fontHref: GF('family=IBM+Plex+Sans:wght@400;500;600;700'),
     vars: {
       '--orgchart-font': "'IBM Plex Sans', system-ui, sans-serif",
@@ -257,7 +259,8 @@ export const THEMES: Record<ThemeId, OrgChartTheme> = {
   ormas: {
     id: 'ormas',
     label: 'Ormas',
-    description: 'Merah-putih dengan aksen emas, judul tegas — gaya spanduk/kop organisasi masyarakat.',
+    description:
+      'Merah-putih dengan aksen emas, judul tegas — gaya spanduk/kop organisasi masyarakat.',
     fontHref: GF('family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700'),
     vars: {
       '--orgchart-font': "'Plus Jakarta Sans', system-ui, sans-serif",

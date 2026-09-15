@@ -5,10 +5,11 @@
  * browser), buildTree diukur langsung. Angka absolut tergantung hardware;
  * yang penting orde besaran vs target NFR-1 (<100ms initial, <16ms toggle).
  */
-import { bench, describe } from 'vitest';
+
 import { renderToString } from 'react-dom/server';
-import { OrgChart } from '../lib/OrgChart';
+import { bench, describe } from 'vitest';
 import { buildTree, idsUpToDepth } from '../lib/buildTree';
+import { OrgChart } from '../lib/OrgChart';
 import type { OrgNode } from '../lib/types';
 
 /** Org sintetis: setiap node punya `branching` anak sampai total n. */

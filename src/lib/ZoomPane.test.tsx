@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
-import { beforeAll, describe, expect, it, vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { OrgChart } from './OrgChart';
 import type { OrgNode } from './types';
 
@@ -30,14 +31,10 @@ describe('ZoomPane — controls (zoomable prop)', () => {
     const { rerender } = render(<OrgChart data={data} zoomable />);
     expect(screen.getByRole('button', { name: 'Zoom in' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Zoom out' })).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: 'Reset zoom' }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Reset zoom' })).toBeInTheDocument();
 
     rerender(<OrgChart data={data} />);
-    expect(
-      screen.queryByRole('button', { name: 'Zoom in' }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Zoom in' })).not.toBeInTheDocument();
   });
 
   it('Zoom in scales the canvas transform up', async () => {
@@ -79,9 +76,7 @@ describe('ZoomPane — drag to pan (regression: onClickCapture vs onNodeClick)',
 
   it('a drag that passes over a node does NOT fire onNodeClick on it', () => {
     const onNodeClick = vi.fn();
-    const { container } = render(
-      <OrgChart data={data} zoomable onNodeClick={onNodeClick} />,
-    );
+    const { container } = render(<OrgChart data={data} zoomable onNodeClick={onNodeClick} />);
     const viewport = getViewport(container);
 
     fireEvent.pointerDown(viewport, { clientX: 0, clientY: 0, pointerId: 1, button: 0 });
@@ -100,8 +95,6 @@ describe('ZoomPane — drag to pan (regression: onClickCapture vs onNodeClick)',
 
     fireEvent.click(screen.getByText('Tee O'));
 
-    expect(onNodeClick).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'cto' }),
-    );
+    expect(onNodeClick).toHaveBeenCalledWith(expect.objectContaining({ id: 'cto' }));
   });
 });

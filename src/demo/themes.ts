@@ -1,13 +1,13 @@
 import {
+  type ChartVarStyle,
+  type ChartVars,
   THEMES as LIB_THEMES,
   THEME_ORDER,
-  type ChartVars,
-  type ChartVarStyle,
   type ThemeId,
 } from '../lib';
 
+export type { ChartVarStyle, ChartVars, ThemeId };
 export { THEME_ORDER };
-export type { ThemeId, ChartVars, ChartVarStyle };
 
 /**
  * Token demo-only (shell halaman: header/toolbar/panel) — bukan bagian
@@ -170,6 +170,7 @@ const STORAGE_KEY = 'org-hierarchy-tree-demo-theme';
 export function loadStoredTheme(): ThemeId {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
+    // biome-ignore lint/suspicious/noPrototypeBuiltins: Object.hasOwn needs ES2022 lib; tsconfig targets ES2020 on purpose
     if (raw && Object.prototype.hasOwnProperty.call(THEMES, raw)) return raw as ThemeId;
   } catch {
     // localStorage tidak tersedia (private mode, dll) — abaikan, pakai default

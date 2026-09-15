@@ -12,18 +12,14 @@ describe('exportChartToPng (FR-12)', () => {
   });
 
   it('rejects when target is not mounted, without touching html-to-image', async () => {
-    await expect(exportChartToPng(null, 'x.png')).rejects.toThrow(
-      /not mounted/i,
-    );
+    await expect(exportChartToPng(null, 'x.png')).rejects.toThrow(/not mounted/i);
     expect(toPngMock).not.toHaveBeenCalled();
   });
 
   it('calls toPng with the given element and triggers a download with the filename', async () => {
     toPngMock.mockResolvedValue('data:image/png;base64,abc');
     const target = document.createElement('div');
-    const clickSpy = vi
-      .spyOn(HTMLAnchorElement.prototype, 'click')
-      .mockImplementation(() => {});
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
 
     await exportChartToPng(target, 'chart.png');
 
@@ -34,8 +30,6 @@ describe('exportChartToPng (FR-12)', () => {
   it('propagates errors from html-to-image (e.g. tainted canvas)', async () => {
     toPngMock.mockRejectedValue(new Error('tainted canvas'));
     const target = document.createElement('div');
-    await expect(exportChartToPng(target, 'chart.png')).rejects.toThrow(
-      'tainted canvas',
-    );
+    await expect(exportChartToPng(target, 'chart.png')).rejects.toThrow('tainted canvas');
   });
 });

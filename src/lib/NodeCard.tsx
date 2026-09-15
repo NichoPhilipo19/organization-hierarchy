@@ -1,5 +1,5 @@
-import type { OrgNode } from './types';
 import s from './OrgChart.module.css';
+import type { OrgNode } from './types';
 
 function initials(name: string): string {
   return name

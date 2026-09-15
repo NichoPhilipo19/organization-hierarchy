@@ -10,9 +10,7 @@ export function fromNested(input: NestedOrgNode | NestedOrgNode[]): OrgNode[] {
   const out: OrgNode[] = [];
 
   // stack LIFO → isi terbalik supaya urutan input terjaga saat pop
-  const stack: Array<[NestedOrgNode, string | null]> = [...rootsIn]
-    .reverse()
-    .map((r) => [r, null]);
+  const stack: Array<[NestedOrgNode, string | null]> = [...rootsIn].reverse().map((r) => [r, null]);
   while (stack.length > 0) {
     const [nested, parentId] = stack.pop()!;
     const { children, ...rest } = nested;

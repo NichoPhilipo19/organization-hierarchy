@@ -38,7 +38,7 @@
 
 /* Stub vertikal dari parent turun ke bar horizontal anak-anak */
 .level::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 50%;
@@ -66,7 +66,7 @@
 
 /* Setengah kiri bar horizontal */
 .branch::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   right: 50%;
@@ -77,7 +77,7 @@
 
 /* Setengah kanan bar horizontal + garis vertikal turun ke kartu */
 .branch::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 50%;

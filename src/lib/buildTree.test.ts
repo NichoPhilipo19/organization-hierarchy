@@ -41,9 +41,7 @@ describe('buildTree', () => {
   it('promotes orphans to roots and reports them (FR-7)', () => {
     const { roots, errors } = buildTree([n('ceo', null), n('lost', 'ghost')]);
     expect(roots.map((r) => r.node.id)).toEqual(['ceo', 'lost']);
-    expect(errors).toEqual([
-      expect.objectContaining({ type: 'orphan', nodeId: 'lost' }),
-    ]);
+    expect(errors).toEqual([expect.objectContaining({ type: 'orphan', nodeId: 'lost' })]);
   });
 
   it('keeps first occurrence on duplicate ids (FR-7)', () => {
@@ -52,19 +50,13 @@ describe('buildTree', () => {
       { id: 'x', parentId: 'ceo', name: 'First' },
       { id: 'x', parentId: 'ceo', name: 'Second' },
     ]);
-    expect(errors).toEqual([
-      expect.objectContaining({ type: 'duplicate', nodeId: 'x' }),
-    ]);
+    expect(errors).toEqual([expect.objectContaining({ type: 'duplicate', nodeId: 'x' })]);
     expect(roots[0]!.children).toHaveLength(1);
     expect(roots[0]!.children[0]!.node.name).toBe('First');
   });
 
   it('breaks two-node cycles and keeps every node renderable (FR-7)', () => {
-    const { roots, errors } = buildTree([
-      n('ceo', null),
-      n('a', 'b'),
-      n('b', 'a'),
-    ]);
+    const { roots, errors } = buildTree([n('ceo', null), n('a', 'b'), n('b', 'a')]);
     expect(errors.some((e) => e.type === 'cycle')).toBe(true);
     // Semua node tetap ter-render: total node di forest = 3
     const count = (t: (typeof roots)[number]): number =>
@@ -75,19 +67,12 @@ describe('buildTree', () => {
   it('handles self-parent as cycle (FR-7)', () => {
     const { roots, errors } = buildTree([n('solo', 'solo')]);
     expect(roots.map((r) => r.node.id)).toEqual(['solo']);
-    expect(errors).toEqual([
-      expect.objectContaining({ type: 'cycle', nodeId: 'solo' }),
-    ]);
+    expect(errors).toEqual([expect.objectContaining({ type: 'cycle', nodeId: 'solo' })]);
   });
 
   it('handles longer cycle chains with attached subtree', () => {
     // a → b → c → a, dan d anak dari c
-    const { roots, errors } = buildTree([
-      n('a', 'c'),
-      n('b', 'a'),
-      n('c', 'b'),
-      n('d', 'c'),
-    ]);
+    const { roots, errors } = buildTree([n('a', 'c'), n('b', 'a'), n('c', 'b'), n('d', 'c')]);
     expect(errors.some((e) => e.type === 'cycle')).toBe(true);
     const ids = new Set<string>();
     const collect = (t: (typeof roots)[number]) => {

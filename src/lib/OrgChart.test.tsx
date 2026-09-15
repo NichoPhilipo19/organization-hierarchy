@@ -22,7 +22,7 @@ describe('OrgChart — uncontrolled toggle (FR-3/4/5/10)', () => {
     render(<OrgChart data={data} />);
     expect(screen.getByText('Cee O')).toBeInTheDocument();
     expect(screen.getByText('Tee O')).toBeInTheDocument();
-    // Subtree collapsed tidak di DOM sama sekali (FR-10)
+    // Collapsed subtree isn't in the DOM at all (FR-10)
     expect(screen.queryByText('Eng One')).not.toBeInTheDocument();
   });
 
@@ -38,7 +38,7 @@ describe('OrgChart — uncontrolled toggle (FR-3/4/5/10)', () => {
     expect(
       screen.getByRole('button', { name: /collapse 2 direct reports of tee o/i }),
     ).toBeInTheDocument();
-    // collapse lagi
+    // collapse again
     await user.click(screen.getByRole('button', { name: /collapse 2 direct reports of tee o/i }));
     expect(screen.queryByText('Eng One')).not.toBeInTheDocument();
   });
@@ -51,12 +51,12 @@ describe('OrgChart — controlled mode (FR-6)', () => {
     const { rerender } = render(
       <OrgChart data={data} expandedIds={new Set()} onExpandedChange={onChange} />,
     );
-    // Semua collapsed
+    // All collapsed
     expect(screen.queryByText('Tee O')).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: /expand 2 direct reports of cee o/i }));
     expect(onChange).toHaveBeenCalledWith(new Set(['ceo']));
-    // DOM tidak berubah sampai prop di-update (controlled sejati)
+    // DOM doesn't change until the prop is updated (truly controlled)
     expect(screen.queryByText('Tee O')).not.toBeInTheDocument();
 
     rerender(<OrgChart data={data} expandedIds={new Set(['ceo'])} onExpandedChange={onChange} />);
@@ -83,7 +83,7 @@ describe('OrgChart — renderNode (FR-8)', () => {
   });
 });
 
-describe('OrgChart — onNodeClick terpisah dari toggle (FR-4)', () => {
+describe('OrgChart — onNodeClick separate from toggle (FR-4)', () => {
   it('fires on card click but NOT on toggle click', async () => {
     const user = userEvent.setup();
     const onClick = vi.fn();
@@ -94,7 +94,7 @@ describe('OrgChart — onNodeClick terpisah dari toggle (FR-4)', () => {
     expect(onClick).toHaveBeenCalledWith(expect.objectContaining({ id: 'cto' }));
 
     await user.click(screen.getByRole('button', { name: /expand 2 direct reports/i }));
-    expect(onClick).toHaveBeenCalledTimes(1); // tidak bertambah
+    expect(onClick).toHaveBeenCalledTimes(1); // doesn't increase
   });
 });
 
@@ -113,7 +113,7 @@ describe('OrgChart — onDataError (FR-7, regresi T-2)', () => {
           <button type="button" onClick={() => setTick(tick + 1)}>
             rerender {tick}
           </button>
-          {/* callback inline — identitas berubah setiap render (pola paling umum) */}
+          {/* inline callback — identity changes every render (the most common pattern) */}
           <OrgChart data={dirty} onDataError={(errs) => calls.push(errs)} />
         </div>
       );
@@ -124,15 +124,15 @@ describe('OrgChart — onDataError (FR-7, regresi T-2)', () => {
 
     await user.click(screen.getByText(/rerender/));
     await user.click(screen.getByText(/rerender/));
-    expect(calls).toHaveLength(1); // T-2: tidak re-fire
+    expect(calls).toHaveLength(1); // T-2: doesn't re-fire
   });
 });
 
-describe('OrgChart — data berubah (T-4)', () => {
+describe('OrgChart — data changes (T-4)', () => {
   it('re-applies defaultExpandedDepth when data identity changes (uncontrolled)', async () => {
     const user = userEvent.setup();
     const { rerender } = render(<OrgChart data={data} />);
-    // Collapse root dulu supaya state internal ≠ default
+    // Collapse the root first so internal state ≠ default
     await user.click(screen.getByRole('button', { name: /collapse 2 direct reports of cee o/i }));
     expect(screen.queryByText('Tee O')).not.toBeInTheDocument();
 
@@ -142,7 +142,7 @@ describe('OrgChart — data berubah (T-4)', () => {
       { id: 'intern', parentId: 'aide', name: 'New Intern' },
     ];
     rerender(<OrgChart data={dataB} />);
-    // defaultExpandedDepth=1 diterapkan ulang: root terbuka, cucu tertutup
+    // defaultExpandedDepth=1 is reapplied: root open, grandchild closed
     expect(screen.getByText('New Aide')).toBeInTheDocument();
     expect(screen.queryByText('New Intern')).not.toBeInTheDocument();
   });
@@ -168,7 +168,7 @@ describe('OrgChart — keyboard navigation (US-11, WAI-ARIA tree)', () => {
     const user = userEvent.setup();
     render(<OrgChart data={data} />);
 
-    await user.tab(); // masuk ke tree → treeitem pertama
+    await user.tab(); // enters the tree → first treeitem
     expect(item('Cee O')).toHaveFocus();
 
     await user.keyboard('{ArrowDown}');

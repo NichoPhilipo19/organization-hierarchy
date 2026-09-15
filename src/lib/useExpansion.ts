@@ -10,13 +10,13 @@ interface UseExpansionArgs {
 }
 
 /**
- * Controlled/uncontrolled expand state (FR-6), mengikuti konvensi value/defaultValue.
- * Set berisi id node yang TERBUKA → node baru otomatis collapsed.
+ * Controlled/uncontrolled expand state (FR-6), following the value/defaultValue convention.
+ * The set holds ids of OPEN nodes → new nodes are collapsed by default.
  *
- * Perilaku saat `data` berubah (uncontrolled) — Technical Design §7:
- * `defaultExpandedDepth` diterapkan ulang terhadap tree baru. Konsekuensinya
- * `data` harus referentially stable antar render (bukan array inline) —
- * sama seperti syarat memoization di useOrgTree.
+ * Behavior when `data` changes (uncontrolled) — Technical Design §7:
+ * `defaultExpandedDepth` is reapplied against the new tree. Consequently
+ * `data` must be referentially stable across renders (not an inline array) —
+ * the same requirement as the memoization in useOrgTree.
  */
 export function useExpansion({
   roots,
@@ -28,8 +28,8 @@ export function useExpansion({
     idsUpToDepth(roots, defaultExpandedDepth),
   );
 
-  // Reset state internal saat tree berubah identitas (data baru) —
-  // pola "derive state during render" dari dokumentasi React.
+  // Reset internal state when the tree's identity changes (new data) —
+  // the "derive state during render" pattern from the React docs.
   const [prevRoots, setPrevRoots] = useState(roots);
   if (prevRoots !== roots) {
     setPrevRoots(roots);

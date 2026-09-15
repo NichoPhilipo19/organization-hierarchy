@@ -1,7 +1,7 @@
 /**
- * Export chart ke PNG (FR-12). `html-to-image` di-dynamic-import supaya
- * konsumen yang tidak pernah memanggil exportToPng tidak menanggung cost
- * bundle-nya — lihat TECHNICAL_DESIGN.md §Export.
+ * Exports the chart to PNG (FR-12). `html-to-image` is dynamically imported so
+ * consumers who never call exportToPng don't pay its bundle cost —
+ * see TECHNICAL_DESIGN.md §Export.
  */
 export async function exportChartToPng(
   target: HTMLElement | null,

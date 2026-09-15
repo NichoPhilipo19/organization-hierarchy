@@ -5,9 +5,9 @@ import type { NodeState, TreeNode } from './types';
 
 interface BranchProps {
   tree: TreeNode;
-  /** aria-posinset — posisi 1-based di antara siblings. */
+  /** aria-posinset — 1-based position among siblings. */
   posInSet: number;
-  /** aria-setsize — jumlah siblings. */
+  /** aria-setsize — number of siblings. */
   setSize: number;
 }
 
@@ -39,7 +39,7 @@ export function Branch({ tree, posInSet, setSize }: BranchProps) {
       data-orgchart-node={node.id}
       tabIndex={node.id === tabbableId ? 0 : -1}
       onFocus={(e) => {
-        // Hanya saat li-nya sendiri yang fokus (bukan bubbling dari toggle)
+        // Only when the li itself receives focus (not bubbling from the toggle)
         if (e.target === e.currentTarget) onItemFocus(node.id);
       }}
     >
@@ -60,9 +60,9 @@ export function Branch({ tree, posInSet, setSize }: BranchProps) {
           <button
             type="button"
             className={s.toggle}
-            tabIndex={-1} /* keyboard: pakai arrow keys di treeitem (roving) */
+            tabIndex={-1} /* keyboard: handled via arrow keys on the treeitem (roving) */
             onClick={(e) => {
-              e.stopPropagation(); // jangan bocor ke onNodeClick (FR-4)
+              e.stopPropagation(); // don't leak to onNodeClick (FR-4)
               toggle(node.id);
             }}
             aria-label={
@@ -76,7 +76,7 @@ export function Branch({ tree, posInSet, setSize }: BranchProps) {
         )}
       </div>
       {isExpanded && (
-        /* Subtree collapsed tidak di-render sama sekali (FR-10) */
+        /* Collapsed subtree isn't rendered at all (FR-10) */
         /* biome-ignore lint/a11y/useSemanticElements: role="group" here is part of the WAI-ARIA treeview pattern (subtree container), not a form grouping - fieldset does not apply */
         <ul className={s.level} role="group">
           {children.map((child, i) => (

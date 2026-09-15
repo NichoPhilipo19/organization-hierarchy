@@ -11,7 +11,7 @@ import { useExpansion } from './useExpansion';
 import { useOrgTree } from './useOrgTree';
 import { ZoomPane } from './ZoomPane';
 
-/** Node yang terlihat (ancestor-nya expanded), urutan DFS = urutan visual/keyboard. */
+/** Visible nodes (whose ancestors are expanded), in DFS order = visual/keyboard order. */
 function flattenVisible(roots: TreeNode[], expanded: ReadonlySet<string>): TreeNode[] {
   const out: TreeNode[] = [];
   const walk = (tn: TreeNode) => {
@@ -25,8 +25,8 @@ function flattenVisible(roots: TreeNode[], expanded: ReadonlySet<string>): TreeN
 }
 
 /**
- * <OrgChart data={flatArray} /> — org chart siap pakai (US-1).
- * Lihat PRD.md & TECHNICAL_DESIGN.md untuk keputusan desain.
+ * <OrgChart data={flatArray} /> — a ready-to-use org chart (US-1).
+ * See PRD.md & TECHNICAL_DESIGN.md for design decisions.
  */
 export const OrgChart = forwardRef<OrgChartHandle, OrgChartProps>(function OrgChart(
   {
@@ -46,8 +46,8 @@ export const OrgChart = forwardRef<OrgChartHandle, OrgChartProps>(function OrgCh
 ) {
   const { roots, errors } = useOrgTree(data);
 
-  // T-2: callback disimpan di ref supaya effect hanya di-trigger oleh `errors`.
-  // Konsumen boleh menulis onDataError inline tanpa menyebabkan re-fire.
+  // T-2: the callback is stored in a ref so the effect is only triggered by `errors`.
+  // Consumers can pass onDataError inline without causing a re-fire.
   const onDataErrorRef = useRef(onDataError);
   useEffect(() => {
     onDataErrorRef.current = onDataError;
@@ -114,7 +114,7 @@ export const OrgChart = forwardRef<OrgChartHandle, OrgChartProps>(function OrgCh
     return m;
   }, [roots]);
 
-  // Roving tabindex: focusedId kalau masih terlihat, kalau tidak node pertama.
+  // Roving tabindex: focusedId if it's still visible, otherwise the first node.
   const visibleIds = useMemo(() => new Set(visible.map((v) => v.node.id)), [visible]);
   const tabbableId =
     focusedId && visibleIds.has(focusedId) ? focusedId : (visible[0]?.node.id ?? null);
@@ -128,7 +128,7 @@ export const OrgChart = forwardRef<OrgChartHandle, OrgChartProps>(function OrgCh
 
   const onTreeKeyDown = (e: KeyboardEvent<HTMLUListElement>) => {
     const target = e.target as HTMLElement;
-    // Hanya tangani saat fokus di treeitem-nya sendiri (bukan tombol di dalamnya)
+    // Only handle this when focus is on the treeitem itself (not a button inside it)
     if (target.getAttribute('role') !== 'treeitem') return;
     const id = target.dataset.orgchartNode;
     if (!id) return;
@@ -169,7 +169,7 @@ export const OrgChart = forwardRef<OrgChartHandle, OrgChartProps>(function OrgCh
         else if (hasChildren) toggle(id);
         break;
       default:
-        return; // key lain: jangan preventDefault
+        return; // other keys: don't preventDefault
     }
     e.preventDefault();
   };

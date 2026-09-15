@@ -7,11 +7,11 @@ export interface ChartContextValue {
   toggle: (id: string) => void;
   renderNode?: (node: OrgNode, state: NodeState) => ReactNode;
   onNodeClick?: (node: OrgNode) => void;
-  /** Node yang di-highlight (search). */
+  /** Highlighted nodes (search). */
   highlighted?: ReadonlySet<string>;
-  /** Roving tabindex (WAI-ARIA tree): satu-satunya treeitem dengan tabIndex 0. */
+  /** Roving tabindex (WAI-ARIA tree): the one treeitem with tabIndex 0. */
   tabbableId: string | null;
-  /** Dipanggil saat sebuah treeitem menerima focus (klik/Tab). */
+  /** Called when a treeitem receives focus (click/Tab). */
   onItemFocus: (id: string) => void;
 }
 

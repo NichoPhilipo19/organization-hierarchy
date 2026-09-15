@@ -1,13 +1,13 @@
 import type { BuildTreeResult, OrgNode, TreeError, TreeNode } from './types';
 
 /**
- * Flat array → forest. Satu pass O(n) + satu traversal untuk depth & deteksi cycle.
+ * Flat array → forest. One O(n) pass plus one traversal for depth & cycle detection.
  *
- * Kebijakan data kotor (FR-7):
- * - duplicate id  → node pertama menang, sisanya diabaikan
- * - orphan        → dipromosikan jadi root
- * - cycle         → satu parent-link dalam cycle diputus, node jadi root
- * Semua kasus dicatat di `errors`; input tidak pernah dimutasi.
+ * Dirty data policy (FR-7):
+ * - duplicate id  → first node wins, the rest are ignored
+ * - orphan        → promoted to root
+ * - cycle         → one parent link in the cycle is broken, node becomes root
+ * All cases are recorded in `errors`; the input is never mutated.
  */
 export function buildTree(nodes: OrgNode[]): BuildTreeResult {
   const errors: TreeError[] = [];
@@ -50,7 +50,7 @@ export function buildTree(nodes: OrgNode[]): BuildTreeResult {
     }
   }
 
-  // Traversal dari roots: set depth + tandai reachable.
+  // Traversal from roots: set depth + mark reachable.
   const visited = new Set<string>();
   const visit = (start: TreeNode, startDepth: number) => {
     const stack: Array<[TreeNode, number]> = [[start, startDepth]];
@@ -64,11 +64,11 @@ export function buildTree(nodes: OrgNode[]): BuildTreeResult {
   };
   for (const root of roots) visit(root, 0);
 
-  // Node yang tidak reachable dari root mana pun pasti berada di (atau di bawah) cycle.
+  // Any node unreachable from any root must be in (or below) a cycle.
   for (const tn of map.values()) {
     if (visited.has(tn.node.id)) continue;
 
-    // Naik lewat parent chain sampai ketemu node yang berulang → itu anggota cycle.
+    // Walk up the parent chain until a node repeats — that's a cycle member.
     const walked = new Set<string>();
     let member = tn;
     while (!walked.has(member.node.id)) {
@@ -76,7 +76,7 @@ export function buildTree(nodes: OrgNode[]): BuildTreeResult {
       member = map.get(member.node.parentId!)!;
     }
 
-    // Putus parent-link anggota cycle: lepas dari children parent, promosikan jadi root.
+    // Break the cycle member's parent link: remove it from the parent's children, promote it to root.
     const parent = map.get(member.node.parentId!)!;
     const idx = parent.children.indexOf(member);
     if (idx >= 0) parent.children.splice(idx, 1);
@@ -92,7 +92,7 @@ export function buildTree(nodes: OrgNode[]): BuildTreeResult {
   return { roots, errors };
 }
 
-/** Id semua node dengan depth < maxDepth — untuk defaultExpandedDepth. (FR-3) */
+/** Ids of all nodes with depth < maxDepth — for defaultExpandedDepth. (FR-3) */
 export function idsUpToDepth(roots: TreeNode[], maxDepth: number): Set<string> {
   const ids = new Set<string>();
   const stack = [...roots];

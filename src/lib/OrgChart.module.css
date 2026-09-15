@@ -1,9 +1,9 @@
 /*
- * Connector digambar murni dengan CSS pseudo-elements (Technical Design §4).
- * Geometri: gap vertikal parent→child dibagi dua:
- *   - ul.level::before  → stub vertikal turun dari parent (setengah atas)
- *   - li.branch::after  → garis vertikal + horizontal di setengah bawah
- * first/last/only-child hanya menghapus border-top yang tidak perlu.
+ * Connectors are drawn purely with CSS pseudo-elements (Technical Design §4).
+ * Geometry: the vertical parent→child gap is split in two:
+ *   - ul.level::before  → vertical stub going down from the parent (top half)
+ *   - li.branch::after  → vertical + horizontal line in the bottom half
+ * first/last/only-child just removes the unnecessary border-top.
  */
 
 .chart {
@@ -23,10 +23,10 @@
 }
 
 .root {
-  gap: 48px; /* jarak antar company (multi-root, FR-2) */
-  /* Centering yang aman untuk scroll container: width max-content + margin auto.
-     justify-content:center pada konten yang overflow membuat sisi kiri
-     tidak ter-scroll (scrollLeft tidak bisa negatif). */
+  gap: 48px; /* spacing between companies (multi-root, FR-2) */
+  /* Safe centering for a scroll container: width max-content + margin auto.
+     justify-content:center on overflowing content makes the left side
+     unreachable by scroll (scrollLeft can't go negative). */
   width: max-content;
   margin: 0 auto;
 }
@@ -36,7 +36,7 @@
   padding-top: var(--orgchart-gap-half, 20px);
 }
 
-/* Stub vertikal dari parent turun ke bar horizontal anak-anak */
+/* Vertical stub from the parent down to the children's horizontal bar */
 .level::before {
   content: "";
   position: absolute;
@@ -55,7 +55,7 @@
   padding: var(--orgchart-gap-half, 20px) 10px 0;
 }
 
-/* Root company tidak punya garis ke atas */
+/* Root company has no line going up */
 .root > .branch {
   padding-top: 0;
 }
@@ -64,7 +64,7 @@
   display: none;
 }
 
-/* Setengah kiri bar horizontal */
+/* Left half of the horizontal bar */
 .branch::before {
   content: "";
   position: absolute;
@@ -75,7 +75,7 @@
   border-top: var(--orgchart-line-width, 2px) solid var(--orgchart-line-color, #d0d5dd);
 }
 
-/* Setengah kanan bar horizontal + garis vertikal turun ke kartu */
+/* Right half of the horizontal bar + vertical line down to the card */
 .branch::after {
   content: "";
   position: absolute;
@@ -87,8 +87,8 @@
   border-left: var(--orgchart-line-width, 2px) solid var(--orgchart-line-color, #d0d5dd);
 }
 
-/* Anak pertama: tidak ada bar ke kiri. Anak terakhir: tidak ada bar ke kanan.
-   Only-child = keduanya → tinggal garis vertikal lurus. */
+/* First child: no bar to the left. Last child: no bar to the right.
+   Only-child = both → just a straight vertical line. */
 .branch:first-child::before {
   border-top: none;
 }
@@ -106,7 +106,7 @@
   cursor: pointer;
 }
 
-/* Roving tabindex: fokus keyboard terlihat pada treeitem */
+/* Roving tabindex: keyboard focus visible on the treeitem */
 .branch:focus-visible {
   outline: none;
 }
@@ -117,7 +117,7 @@
   border-radius: var(--orgchart-card-radius, 10px);
 }
 
-/* Highlight (search) — ring pada kartu */
+/* Highlight (search) — ring on the card */
 .highlighted {
   outline: 2px solid var(--orgchart-highlight-color, #f79009);
   outline-offset: 2px;
@@ -175,7 +175,7 @@
   outline-offset: 1px;
 }
 
-/* ---- Kartu default (FR-9) — theming via custom properties (OQ-3) ---- */
+/* ---- Default card (FR-9) — theming via custom properties (OQ-3) ---- */
 
 .card {
   display: flex;

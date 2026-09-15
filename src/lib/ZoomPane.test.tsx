@@ -6,8 +6,8 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { OrgChart } from './OrgChart';
 import type { OrgNode } from './types';
 
-// jsdom belum mengimplementasikan Pointer Capture API — stub minimal supaya
-// ZoomPane.onPointerDown (yang memanggil setPointerCapture) tidak throw.
+// jsdom doesn't implement the Pointer Capture API yet — minimal stub so
+// ZoomPane.onPointerDown (which calls setPointerCapture) doesn't throw.
 beforeAll(() => {
   Object.assign(Element.prototype, {
     setPointerCapture: () => {},
@@ -82,8 +82,8 @@ describe('ZoomPane — drag to pan (regression: onClickCapture vs onNodeClick)',
     fireEvent.pointerDown(viewport, { clientX: 0, clientY: 0, pointerId: 1, button: 0 });
     fireEvent.pointerMove(viewport, { clientX: 40, clientY: 0, pointerId: 1 }); // dx=40 > threshold
     fireEvent.pointerUp(viewport, { clientX: 40, clientY: 0, pointerId: 1 });
-    // Browser mengirim click yang menyusul pointerup setelah drag — onClickCapture
-    // di ZoomPane harus menekannya sebelum sampai ke handler onNodeClick di kartu.
+    // The browser sends a click following pointerup after a drag — onClickCapture
+    // in ZoomPane must suppress it before it reaches the onNodeClick handler on the card.
     fireEvent.click(screen.getByText('Tee O'));
 
     expect(onNodeClick).not.toHaveBeenCalled();

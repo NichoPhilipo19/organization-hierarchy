@@ -1,18 +1,18 @@
 import type { ReactNode } from 'react';
 
-/** Satu node organisasi — bentuk flat, natural dari API/DB. (FR-1) */
+/** A single organization node — flat shape, natural for API/DB. (FR-1) */
 export interface OrgNode {
   id: string;
-  /** `null` = root. Beberapa root = multi-company. (FR-2) */
+  /** `null` = root. Multiple roots = multi-company. (FR-2) */
   parentId: string | null;
   name: string;
   title?: string;
   avatarUrl?: string;
-  /** Payload bebas milik konsumen — dilewatkan apa adanya ke renderNode. */
+  /** Free-form payload owned by the consumer — passed through as-is to renderNode. */
   data?: Record<string, unknown>;
 }
 
-/** Node internal hasil buildTree. */
+/** Internal node produced by buildTree. */
 export interface TreeNode {
   node: OrgNode;
   children: TreeNode[];
@@ -21,7 +21,7 @@ export interface TreeNode {
 
 export type TreeErrorType = 'orphan' | 'cycle' | 'duplicate';
 
-/** Laporan data kotor — chart tetap render sebisanya. (FR-7) */
+/** Report of dirty data — the chart still renders as best it can. (FR-7) */
 export interface TreeError {
   type: TreeErrorType;
   nodeId: string;
@@ -33,31 +33,31 @@ export interface BuildTreeResult {
   errors: TreeError[];
 }
 
-/** State node yang diberikan ke renderNode. (FR-8) */
+/** Node state passed to renderNode. (FR-8) */
 export interface NodeState {
   isExpanded: boolean;
   hasChildren: boolean;
   childCount: number;
   depth: number;
-  /** True jika id node ada di `highlightedIds`. (v2 — search/highlight) */
+  /** True if the node's id is in `highlightedIds`. (v2 — search/highlight) */
   isHighlighted: boolean;
 }
 
-/** Bentuk nested untuk helper fromNested() — konversi one-way ke flat. */
+/** Nested shape for the fromNested() helper — one-way conversion to flat. */
 export interface NestedOrgNode extends Omit<OrgNode, 'parentId'> {
   children?: NestedOrgNode[];
 }
 
-/** Imperative handle — `useRef<OrgChartHandle>` + prop `ref`. (US-10) */
+/** Imperative handle — `useRef<OrgChartHandle>` + the `ref` prop. (US-10) */
 export interface OrgChartHandle {
-  /** Expand semua node yang punya anak. */
+  /** Expand every node that has children. */
   expandAll(): void;
-  /** Collapse semua node. */
+  /** Collapse every node. */
   collapseAll(): void;
   /**
-   * Export tree yang sedang ter-render (node visible saja, mengabaikan
-   * zoom/pan saat ini) ke file PNG. Menolak jika chart belum ter-mount
-   * (misal `data` kosong). (FR-12)
+   * Exports the currently rendered tree (visible nodes only, ignoring the
+   * current zoom/pan) to a PNG file. Rejects if the chart isn't mounted yet
+   * (e.g. `data` is empty). (FR-12)
    */
   exportToPng(filename?: string): Promise<void>;
 }
@@ -65,32 +65,32 @@ export interface OrgChartHandle {
 export interface OrgChartProps {
   data: OrgNode[];
 
-  /** Override tampilan node sepenuhnya. Default: kartu bawaan. (FR-8, FR-9) */
+  /** Fully override node rendering. Default: the built-in card. (FR-8, FR-9) */
   renderNode?: (node: OrgNode, state: NodeState) => ReactNode;
 
-  /** Uncontrolled: expand semua node dengan depth < nilai ini. Default 1. (FR-3) */
+  /** Uncontrolled: expand every node with depth < this value. Default 1. (FR-3) */
   defaultExpandedDepth?: number;
-  /** Controlled mode. Jika diberikan, internal state diabaikan. (FR-6) */
+  /** Controlled mode. When provided, internal state is ignored. (FR-6) */
   expandedIds?: ReadonlySet<string>;
   onExpandedChange?: (ids: Set<string>) => void;
 
-  /** Klik kartu — terpisah dari toggle expand. (FR-4) */
+  /** Card click — separate from the expand toggle. (FR-4) */
   onNodeClick?: (node: OrgNode) => void;
 
   /**
-   * Node yang di-highlight (misal hasil search). Kartu default diberi ring;
-   * renderNode custom menerima `state.isHighlighted`.
-   * Gunakan `ancestorsOf()` untuk auto-expand path ke node hasil search.
+   * Nodes to highlight (e.g. search results). The default card gets a ring;
+   * a custom renderNode receives `state.isHighlighted`.
+   * Use `ancestorsOf()` to auto-expand the path to a search-result node.
    */
   highlightedIds?: ReadonlySet<string>;
 
-  /** Aktifkan zoom (scroll/tombol) & pan (drag). Default false. (v2) */
+  /** Enable zoom (scroll/buttons) & pan (drag). Default false. (v2) */
   zoomable?: boolean;
 
-  /** Dipanggil saat buildTree menemukan orphan/cycle/duplicate. (FR-7) */
+  /** Called when buildTree finds an orphan/cycle/duplicate. (FR-7) */
   onDataError?: (errors: TreeError[]) => void;
 
-  /** Ditampilkan saat data kosong. */
+  /** Rendered when data is empty. */
   emptyState?: ReactNode;
 
   className?: string;

@@ -6,14 +6,14 @@ import { OrgChart } from './OrgChart';
 import { getThemeStyle, THEME_ORDER } from './themes';
 
 /**
- * Story per state (bukan satu demo page digabung) — lihat wishlist di
- * TECHNICAL_DESIGN.md §8: masing-masing preset tema, renderNode custom,
- * dataset kotor, dan zoom & pan sengaja dipisah biar gampang dibandingkan.
+ * One story per state (rather than one combined demo page) — see the
+ * wishlist in TECHNICAL_DESIGN.md §8: each theme preset, custom renderNode,
+ * dirty dataset, and zoom & pan are deliberately kept separate for easy comparison.
  */
 
 export const Default: Story = () => <OrgChart data={sampleData} defaultExpandedDepth={2} />;
 
-// ---- Theme picker: 9 preset dari src/lib/themes.ts, dipilih lewat Ladle control ----
+// ---- Theme picker: 9 presets from src/lib/themes.ts, selected via Ladle control ----
 
 interface ThemePickerProps {
   theme: ThemeId;
@@ -35,7 +35,7 @@ ThemePicker.argTypes = {
   },
 };
 
-// ---- Custom renderNode — lib tidak dipaksa pakai kartu bawaan (FR-8) ----
+// ---- Custom renderNode — the lib doesn't force use of the built-in card (FR-8) ----
 
 function renderCustomNode(node: OrgNode, state: NodeState) {
   return (
@@ -77,7 +77,7 @@ export const CustomRenderNode: Story = () => (
   <OrgChart data={sampleData} defaultExpandedDepth={2} renderNode={renderCustomNode} />
 );
 
-// ---- Dataset kotor — orphan/cycle/duplicate tetap dirender, error dilaporkan (FR-7) ----
+// ---- Dirty dataset — orphan/cycle/duplicate are still rendered, errors reported (FR-7) ----
 
 export const DirtyData: Story = () => {
   const [errors, setErrors] = useState<TreeError[]>([]);
@@ -97,7 +97,7 @@ export const DirtyData: Story = () => {
   );
 };
 
-// ---- Zoom & pan (v2) — scroll untuk zoom, drag untuk pan ----
+// ---- Zoom & pan (v2) — scroll to zoom, drag to pan ----
 
 export const ZoomAndPan: Story = () => (
   <div style={{ height: 480, border: '1px solid #eaecf0', borderRadius: 8 }}>

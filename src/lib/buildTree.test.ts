@@ -58,7 +58,7 @@ describe('buildTree', () => {
   it('breaks two-node cycles and keeps every node renderable (FR-7)', () => {
     const { roots, errors } = buildTree([n('ceo', null), n('a', 'b'), n('b', 'a')]);
     expect(errors.some((e) => e.type === 'cycle')).toBe(true);
-    // Semua node tetap ter-render: total node di forest = 3
+    // Every node is still rendered: total node count in the forest = 3
     const count = (t: (typeof roots)[number]): number =>
       1 + t.children.reduce((acc, c) => acc + count(c), 0);
     expect(roots.reduce((acc, r) => acc + count(r), 0)).toBe(3);
@@ -71,7 +71,7 @@ describe('buildTree', () => {
   });
 
   it('handles longer cycle chains with attached subtree', () => {
-    // a → b → c → a, dan d anak dari c
+    // a → b → c → a, and d is a child of c
     const { roots, errors } = buildTree([n('a', 'c'), n('b', 'a'), n('c', 'b'), n('d', 'c')]);
     expect(errors.some((e) => e.type === 'cycle')).toBe(true);
     const ids = new Set<string>();

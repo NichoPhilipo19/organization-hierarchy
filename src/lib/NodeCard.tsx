@@ -10,7 +10,7 @@ function initials(name: string): string {
     .join('');
 }
 
-/** Kartu default — zero-config (FR-9). Theming via CSS custom properties (OQ-3). */
+/** Default card — zero-config (FR-9). Theming via CSS custom properties (OQ-3). */
 export function NodeCard({ node }: { node: OrgNode }) {
   return (
     <div className={s.card}>

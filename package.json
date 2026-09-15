@@ -51,7 +51,9 @@
     "visuals": "vite build --base=./ && node scripts/capture-visuals.mjs",
     "lint": "biome lint .",
     "format": "biome format --write .",
-    "check": "biome check --write ."
+    "check": "biome check --write .",
+    "story": "ladle serve",
+    "story:build": "ladle build"
   },
   "peerDependencies": {
     "react": ">=18",
@@ -59,6 +61,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.13",
+    "@ladle/react": "^5.1.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",

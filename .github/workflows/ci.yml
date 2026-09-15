@@ -31,3 +31,5 @@ jobs:
       - run: pnpm build
 
       - run: pnpm build:lib
+
+      - run: pnpm story:build

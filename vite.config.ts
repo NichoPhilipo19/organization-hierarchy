@@ -10,9 +10,9 @@ export default defineConfig({
   plugins: [react()],
   test: {
     globals: true, // needed for @testing-library/react auto-cleanup
-    environment: 'node', // logic tests (buildTree dkk) bebas DOM — bukti NFR-6
+    environment: 'node', // logic tests (buildTree etc.) are DOM-free — proof of NFR-6
     include: ['src/**/*.test.{ts,tsx}'],
-    // Component tests (interaksi) butuh DOM
+    // Component tests (interaction) need a DOM
     environmentMatchGlobs: [['src/**/*.test.tsx', 'jsdom']],
     setupFiles: ['src/test/setup.ts'],
   },

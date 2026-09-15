@@ -1,13 +1,50 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { OrgChart, ancestorsOf, idsUpToDepth, useOrgTree } from '../lib';
 import type { OrgChartHandle, OrgNode, TreeError } from '../lib';
 import { dirtyData, sampleData } from './sample-data';
+import {
+  THEME_ORDER,
+  THEMES,
+  loadStoredTheme,
+  storeTheme,
+  type ChartVarStyle,
+  type ThemeId,
+} from './themes';
 
 type Dataset = 'clean' | 'dirty';
+
+const THEME_FONT_LINK_ID = 'orgchart-demo-theme-font';
 
 export function App() {
   const [dataset, setDataset] = useState<Dataset>('clean');
   const data = dataset === 'clean' ? sampleData : dirtyData;
+
+  // Tema demo (v3) — dipilih lewat toolbar, disimpan ke localStorage supaya
+  // tetap terpakai saat halaman dibuka lagi. Lihat ./themes.ts.
+  const [themeId, setThemeId] = useState<ThemeId>(() => loadStoredTheme());
+  const theme = THEMES[themeId];
+
+  useEffect(() => {
+    storeTheme(themeId);
+  }, [themeId]);
+
+  // Font Google per-tema — di-inject/dilepas dari <head> sesuai tema aktif,
+  // supaya tema lain tidak ikut membawa font yang tidak dipakai.
+  useEffect(() => {
+    let link = document.getElementById(THEME_FONT_LINK_ID) as HTMLLinkElement | null;
+    if (!theme.fontHref) {
+      link?.remove();
+      return;
+    }
+    if (!link) {
+      link = document.createElement('link');
+      link.id = THEME_FONT_LINK_ID;
+      link.rel = 'stylesheet';
+      document.head.appendChild(link);
+    }
+    if (link.href !== theme.fontHref) link.href = theme.fontHref;
+  }, [theme.fontHref]);
 
   // Controlled mode (US-4) — memungkinkan Expand all / Collapse all & search dari luar
   const { roots } = useOrgTree(data);
@@ -78,30 +115,100 @@ export function App() {
 
   const onDataError = useCallback((errs: TreeError[]) => setErrors(errs), []);
 
+  // ---- Styling turunan tema (demo shell saja — bukan bagian dari lib) ----
+  const controlStyle: CSSProperties = {
+    fontFamily: theme.page.fontFamily,
+    fontSize: 13,
+    padding: '6px 12px',
+    borderRadius: theme.page.radius,
+    border: `1px solid ${theme.page.border}`,
+    background: theme.page.surface,
+    color: theme.page.text,
+    cursor: 'pointer',
+  };
+  const activeControlStyle: CSSProperties = {
+    ...controlStyle,
+    background: theme.page.accent,
+    borderColor: theme.page.accent,
+    color: theme.page.accentText,
+    cursor: 'default',
+  };
+  const inputStyle: CSSProperties = {
+    ...controlStyle,
+    cursor: 'text',
+  };
+  const chartVarStyle: ChartVarStyle = { ...theme.chart };
+
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', padding: 16 }}>
+    <div
+      style={{
+        fontFamily: theme.page.fontFamily,
+        background: theme.page.background,
+        color: theme.page.text,
+        padding: 16,
+        minHeight: '100vh',
+      }}
+    >
       <header style={{ marginBottom: 12 }}>
-        <h1 style={{ fontSize: 20, margin: '0 0 4px' }}>
+        <h1
+          style={{
+            fontFamily: theme.page.headingFontFamily,
+            fontSize: 22,
+            margin: '0 0 4px',
+          }}
+        >
           Org Hierarchy Tree — Demo
         </h1>
-        <p style={{ margin: 0, color: '#667085', fontSize: 14 }}>
+        <p style={{ margin: 0, color: theme.page.muted, fontSize: 14 }}>
           Multi-company · collapse/expand · controlled state · dirty-data
           handling · search · zoom &amp; pan · keyboard navigation (Tab lalu
           arrow keys)
         </p>
       </header>
 
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: theme.page.muted }}>
+          Tema:
+          <select
+            value={themeId}
+            onChange={(e) => setThemeId(e.target.value as ThemeId)}
+            style={inputStyle}
+          >
+            {THEME_ORDER.map((id) => (
+              <option key={id} value={id}>
+                {THEMES[id].label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <span style={{ fontSize: 12.5, color: theme.page.muted, maxWidth: 260 }}>
+          {theme.description}
+        </span>
+      </div>
+
       <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
-        <button onClick={() => switchDataset('clean')} disabled={dataset === 'clean'}>
+        <button
+          onClick={() => switchDataset('clean')}
+          disabled={dataset === 'clean'}
+          style={dataset === 'clean' ? activeControlStyle : controlStyle}
+        >
           Dataset bersih (2 company, ±50 node)
         </button>
-        <button onClick={() => switchDataset('dirty')} disabled={dataset === 'dirty'}>
+        <button
+          onClick={() => switchDataset('dirty')}
+          disabled={dataset === 'dirty'}
+          style={dataset === 'dirty' ? activeControlStyle : controlStyle}
+        >
           Dataset kotor (orphan/cycle/duplicate)
         </button>
         <span style={{ width: 16 }} />
-        <button onClick={() => setExpanded(new Set(allIds))}>Expand all</button>
-        <button onClick={() => setExpanded(new Set())}>Collapse all</button>
-        <button onClick={() => chartRef.current?.expandAll()}>
+        <button onClick={() => setExpanded(new Set(allIds))} style={controlStyle}>
+          Expand all
+        </button>
+        <button onClick={() => setExpanded(new Set())} style={controlStyle}>
+          Collapse all
+        </button>
+        <button onClick={() => chartRef.current?.expandAll()} style={controlStyle}>
           Expand all (via ref)
         </button>
         <button
@@ -110,11 +217,12 @@ export function App() {
               ?.exportToPng('org-chart.png')
               .catch((err: unknown) => console.error('Export gagal:', err))
           }
+          style={activeControlStyle}
         >
           Export PNG
         </button>
         <span style={{ width: 16 }} />
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14 }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, color: theme.page.text }}>
           <input
             type="checkbox"
             checked={zoomable}
@@ -127,15 +235,10 @@ export function App() {
           placeholder="Cari nama/jabatan…"
           value={query}
           onChange={(e) => runSearch(e.target.value)}
-          style={{
-            padding: '4px 10px',
-            border: '1px solid #d0d5dd',
-            borderRadius: 6,
-            fontSize: 14,
-          }}
+          style={inputStyle}
         />
         {highlightedIds && (
-          <span style={{ fontSize: 13, color: '#667085', alignSelf: 'center' }}>
+          <span style={{ fontSize: 13, color: theme.page.muted, alignSelf: 'center' }}>
             {highlightedIds.size} hasil
           </span>
         )}
@@ -182,7 +285,16 @@ export function App() {
         </div>
       )}
 
-      <div style={{ border: '1px solid #eaecf0', borderRadius: 12 }}>
+      <div
+        style={{
+          border: `1px solid ${theme.page.border}`,
+          borderRadius: theme.page.radius,
+          background: theme.page.surface,
+          // Custom properties --orgchart-* di sini akan mengalir (CSS inheritance)
+          // ke elemen di dalam <OrgChart> — lihat OrgChart.module.css (OQ-3).
+          ...chartVarStyle,
+        }}
+      >
         <OrgChart
           ref={chartRef}
           data={data}

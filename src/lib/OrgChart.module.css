@@ -44,7 +44,7 @@
   left: 50%;
   width: 0;
   height: var(--orgchart-gap-half, 20px);
-  border-left: 2px solid var(--orgchart-line-color, #d0d5dd);
+  border-left: var(--orgchart-line-width, 2px) solid var(--orgchart-line-color, #d0d5dd);
 }
 
 .branch {
@@ -72,7 +72,7 @@
   right: 50%;
   width: 50%;
   height: var(--orgchart-gap-half, 20px);
-  border-top: 2px solid var(--orgchart-line-color, #d0d5dd);
+  border-top: var(--orgchart-line-width, 2px) solid var(--orgchart-line-color, #d0d5dd);
 }
 
 /* Setengah kanan bar horizontal + garis vertikal turun ke kartu */
@@ -83,8 +83,8 @@
   left: 50%;
   width: 50%;
   height: var(--orgchart-gap-half, 20px);
-  border-top: 2px solid var(--orgchart-line-color, #d0d5dd);
-  border-left: 2px solid var(--orgchart-line-color, #d0d5dd);
+  border-top: var(--orgchart-line-width, 2px) solid var(--orgchart-line-color, #d0d5dd);
+  border-left: var(--orgchart-line-width, 2px) solid var(--orgchart-line-color, #d0d5dd);
 }
 
 /* Anak pertama: tidak ada bar ke kiri. Anak terakhir: tidak ada bar ke kanan.
@@ -194,7 +194,7 @@
   flex: none;
   width: 36px;
   height: 36px;
-  border-radius: 50%;
+  border-radius: var(--orgchart-avatar-radius, 50%);
   object-fit: cover;
   display: flex;
   align-items: center;

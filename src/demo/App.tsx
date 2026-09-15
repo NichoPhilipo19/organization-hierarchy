@@ -20,8 +20,8 @@ export function App() {
   const [dataset, setDataset] = useState<Dataset>('clean');
   const data = dataset === 'clean' ? sampleData : dirtyData;
 
-  // Tema demo (v3) — dipilih lewat toolbar, disimpan ke localStorage supaya
-  // tetap terpakai saat halaman dibuka lagi. Lihat ./themes.ts.
+  // Demo theme (v3) — chosen via the toolbar, persisted to localStorage so it
+  // stays applied when the page is reopened. See ./themes.ts.
   const [themeId, setThemeId] = useState<ThemeId>(() => loadStoredTheme());
   const theme = THEMES[themeId];
 
@@ -29,8 +29,8 @@ export function App() {
     storeTheme(themeId);
   }, [themeId]);
 
-  // Font Google per-tema — di-inject/dilepas dari <head> sesuai tema aktif,
-  // supaya tema lain tidak ikut membawa font yang tidak dipakai.
+  // Per-theme Google Font — injected into/removed from <head> based on the
+  // active theme, so other themes don't drag in fonts they don't use.
   useEffect(() => {
     let link = document.getElementById(THEME_FONT_LINK_ID) as HTMLLinkElement | null;
     if (!theme.fontHref) {
@@ -46,7 +46,7 @@ export function App() {
     if (link.href !== theme.fontHref) link.href = theme.fontHref;
   }, [theme.fontHref]);
 
-  // Controlled mode (US-4) — memungkinkan Expand all / Collapse all & search dari luar
+  // Controlled mode (US-4) — enables Expand all / Collapse all & search from outside
   const { roots } = useOrgTree(data);
   const [expanded, setExpanded] = useState<Set<string>>(() => idsUpToDepth(roots, 2));
 
@@ -55,8 +55,8 @@ export function App() {
   const [zoomable, setZoomable] = useState(false);
   const [query, setQuery] = useState('');
 
-  // Imperative handle (US-10) — dipakai saat uncontrolled; di demo controlled
-  // kita tetap tunjukkan keduanya
+  // Imperative handle (US-10) — used in uncontrolled mode; in this controlled
+  // demo we still showcase both
   const chartRef = useRef<OrgChartHandle>(null);
 
   const allIds = useMemo(() => {
@@ -86,7 +86,7 @@ export function App() {
     setQuery(q);
     const qq = q.trim().toLowerCase();
     if (!qq) return;
-    // Auto-expand path ke semua hasil via ancestorsOf()
+    // Auto-expand the path to all results via ancestorsOf()
     setExpanded((prev) => {
       const next = new Set(prev);
       for (const n of data) {
@@ -103,12 +103,12 @@ export function App() {
     setErrors([]);
     setSelected(null);
     setQuery('');
-    setExpanded(new Set()); // reset; user expand sendiri
+    setExpanded(new Set()); // reset; user expands manually
   };
 
   const onDataError = useCallback((errs: TreeError[]) => setErrors(errs), []);
 
-  // ---- Styling turunan tema (demo shell saja — bukan bagian dari lib) ----
+  // ---- Theme-derived styling (demo shell only — not part of the lib) ----
   const controlStyle: CSSProperties = {
     fontFamily: theme.page.fontFamily,
     fontSize: 13,
@@ -310,8 +310,8 @@ export function App() {
           border: `1px solid ${theme.page.border}`,
           borderRadius: theme.page.radius,
           background: theme.page.surface,
-          // Custom properties --orgchart-* di sini akan mengalir (CSS inheritance)
-          // ke elemen di dalam <OrgChart> — lihat OrgChart.module.css (OQ-3).
+          // Custom properties --orgchart-* set here flow (CSS inheritance) down
+          // to elements inside <OrgChart> — see OrgChart.module.css (OQ-3).
           ...chartVarStyle,
         }}
       >

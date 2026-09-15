@@ -2,18 +2,18 @@ import type { OrgNode } from '../lib';
 
 /**
  * Dummy data: 2 company (multi-root), ±50 node, 4 level.
- * Mencakup kasus visual: only-child, 2 anak, banyak anak, subtree dalam.
+ * Covers visual cases: only-child, 2 children, many children, deep subtree.
  */
 
 /**
- * Avatar dummy — di-generate lewat DiceBear (SVG, deterministic per id,
- * tanpa perlu nyimpen file gambar di repo). Sengaja CUMA dipasang di
- * sebagian node: biar live demo menunjukkan dua kondisi sekaligus — kartu
- * yang sudah ada foto vs kartu yang masih fallback ke inisial (lihat
- * `NodeCard`, FR-9) — kayak progres pengisian data avatar yang belum
- * selesai di aplikasi beneran. Root company (`tdt`, `tc`) sengaja
- * dibiarkan tanpa avatar juga: initials-nya (`TD`/`TC`) lebih masuk akal
- * dibaca sebagai singkatan nama perusahaan ketimbang logo.
+ * Dummy avatar — generated via DiceBear (SVG, deterministic per id,
+ * no need to store image files in the repo). Deliberately only attached to
+ * some nodes: so the live demo shows both conditions at once — cards
+ * that already have a photo vs. cards that still fall back to initials
+ * (see `NodeCard`, FR-9) — like the partial rollout of avatar data you'd
+ * see in a real application. Root companies (`tdt`, `tc`) are deliberately
+ * left without an avatar too: their initials (`TD`/`TC`) read more
+ * naturally as a company-name abbreviation than as a logo.
  */
 function avatar(id: string): string {
   return `https://api.dicebear.com/9.x/personas/svg?seed=${encodeURIComponent(id)}`;
@@ -54,7 +54,7 @@ export const sampleData: OrgNode[] = [
     avatarUrl: avatar('tdt-chro'),
   },
 
-  // Engineering (di bawah CTO)
+  // Engineering (under the CTO)
   {
     id: 'eng-vp',
     parentId: 'tdt-cto',
@@ -124,7 +124,7 @@ export const sampleData: OrgNode[] = [
     title: 'Backend Engineer',
     avatarUrl: avatar('be-4'),
   },
-  { id: 'qa-1', parentId: 'qa-lead', name: 'Sinta Maharani', title: 'QA Engineer' }, // only-child — sengaja tanpa avatar
+  { id: 'qa-1', parentId: 'qa-lead', name: 'Sinta Maharani', title: 'QA Engineer' }, // only-child — deliberately without an avatar
   {
     id: 'devops-1',
     parentId: 'devops-lead',
@@ -143,7 +143,7 @@ export const sampleData: OrgNode[] = [
   // Security (only-child branch)
   { id: 'sec-1', parentId: 'sec-lead', name: 'Vino Aditya', title: 'Security Analyst' },
 
-  // Finance (di bawah CFO)
+  // Finance (under the CFO)
   {
     id: 'fin-mgr',
     parentId: 'tdt-cfo',
@@ -175,7 +175,7 @@ export const sampleData: OrgNode[] = [
   },
   { id: 'acc-2', parentId: 'acc-mgr', name: 'Bayu Segara', title: 'Tax Specialist' },
 
-  // Operations (di bawah COO)
+  // Operations (under the COO)
   {
     id: 'ops-mgr',
     parentId: 'tdt-coo',
@@ -207,7 +207,7 @@ export const sampleData: OrgNode[] = [
   },
   { id: 'cs-3', parentId: 'cs-mgr', name: 'Hana Salsabila', title: 'CS Agent' },
 
-  // HR (di bawah CHRO)
+  // HR (under the CHRO)
   {
     id: 'hr-mgr',
     parentId: 'tdt-chro',
@@ -293,7 +293,7 @@ export const sampleData: OrgNode[] = [
   { id: 'tc-wh-2', parentId: 'tc-log-1', name: 'Zahra Kamila', title: 'Warehouse Staff' },
 ];
 
-/** Data sengaja kotor — untuk mendemokan onDataError (US-5). Tanpa avatar; fokusnya validasi, bukan tampilan. */
+/** Deliberately dirty data — for demoing onDataError (US-5). No avatars; the focus is validation, not visuals. */
 export const dirtyData: OrgNode[] = [
   { id: 'root', parentId: null, name: 'Clean Root' },
   { id: 'ok', parentId: 'root', name: 'Valid Child' },

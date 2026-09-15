@@ -10,10 +10,10 @@ export type { ChartVarStyle, ChartVars, ThemeId };
 export { THEME_ORDER };
 
 /**
- * Token demo-only (shell halaman: header/toolbar/panel) — bukan bagian
- * dari lib yang di-publish. Warna & tipografi kartu/connector-nya sendiri
- * datang dari `../lib` (lihat src/lib/themes.ts serta bagian "Theming" di
- * README) supaya konsumen paket bisa pakai preset yang sama persis.
+ * Demo-only tokens (page shell: header/toolbar/panel) — not part of the
+ * published lib. The card/connector colors & typography themselves come
+ * from `../lib` (see src/lib/themes.ts and the "Theming" section of the
+ * README) so package consumers can use the exact same presets.
  */
 interface PageTokens {
   background: string;
@@ -134,21 +134,9 @@ const PAGE_TOKENS: Record<ThemeId, PageTokens> = {
     headingFontFamily: "'Outfit', system-ui, sans-serif",
     radius: '20px',
   },
-  ormas: {
-    background: 'oklch(97% 0.02 80)',
-    surface: '#ffffff',
-    border: 'oklch(85% 0.03 80)',
-    text: 'oklch(20% 0.01 80)',
-    muted: 'oklch(45% 0.01 80)',
-    accent: 'oklch(50% 0.19 25)',
-    accentText: '#ffffff',
-    fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-    headingFontFamily: "'Bebas Neue', sans-serif",
-    radius: '6px',
-  },
 };
 
-/** Gabungan preset lib (kartu/connector) + token shell demo (header/toolbar). */
+/** Combines the lib presets (card/connector) with the demo shell tokens (header/toolbar). */
 export const THEMES: Record<ThemeId, ThemeDefinition> = Object.fromEntries(
   THEME_ORDER.map((id) => {
     const base = LIB_THEMES[id];
@@ -166,23 +154,23 @@ export const THEMES: Record<ThemeId, ThemeDefinition> = Object.fromEntries(
 
 const STORAGE_KEY = 'org-hierarchy-tree-demo-theme';
 
-/** Baca tema tersimpan dari localStorage — best-effort, aman dipanggil di initializer useState. */
+/** Reads the stored theme from localStorage — best-effort, safe to call in a useState initializer. */
 export function loadStoredTheme(): ThemeId {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     // biome-ignore lint/suspicious/noPrototypeBuiltins: Object.hasOwn needs ES2022 lib; tsconfig targets ES2020 on purpose
     if (raw && Object.prototype.hasOwnProperty.call(THEMES, raw)) return raw as ThemeId;
   } catch {
-    // localStorage tidak tersedia (private mode, dll) — abaikan, pakai default
+    // localStorage unavailable (private mode, etc.) — ignore, use the default
   }
   return 'default';
 }
 
-/** Simpan pilihan tema — best-effort, kegagalan tidak boleh mengganggu demo. */
+/** Persists the theme choice — best-effort, a failure must not disrupt the demo. */
 export function storeTheme(id: ThemeId): void {
   try {
     window.localStorage.setItem(STORAGE_KEY, id);
   } catch {
-    // abaikan
+    // ignore
   }
 }

@@ -1,12 +1,12 @@
 import type { CSSProperties } from 'react';
 
 /**
- * Preset tema — bagian dari lib publik (di-export lewat `./index`), bukan
- * demo-only. Setiap tema hanyalah kumpulan nilai untuk custom properties
- * `--orgchart-*` yang sudah dibaca OrgChart.module.css (lihat bagian
- * "Theming" di README) — jadi menambah tema baru tidak pernah menyentuh
- * kode komponen, dan konsumen boleh membuat tema sendiri dengan bentuk
- * yang sama tanpa import apa pun dari sini.
+ * Theme presets — part of the public lib (exported via `./index`), not
+ * demo-only. Each theme is just a set of values for the `--orgchart-*`
+ * custom properties already read by OrgChart.module.css (see the
+ * "Theming" section in the README) — so adding a new theme never touches
+ * component code, and consumers can build their own theme in the same
+ * shape without importing anything from here.
  */
 
 export type ThemeId =
@@ -17,10 +17,9 @@ export type ThemeId =
   | 'corporate'
   | 'industrial'
   | 'government'
-  | 'startup'
-  | 'ormas';
+  | 'startup';
 
-/** Custom properties yang dibaca OrgChart.module.css — semua opsional. */
+/** Custom properties read by OrgChart.module.css — all optional. */
 export type ChartVars = {
   [K in
     | '--orgchart-font'
@@ -43,16 +42,16 @@ export type ChartVars = {
     | '--orgchart-gap-half']?: string;
 };
 
-/** Style object yang aman dipakai di prop `style` React (custom property + CSSProperties biasa). */
+/** Style object safe to use in React's `style` prop (custom properties + regular CSSProperties). */
 export type ChartVarStyle = CSSProperties & ChartVars;
 
 export interface OrgChartTheme {
   id: ThemeId;
   label: string;
   description: string;
-  /** URL stylesheet Google Fonts opsional — inject sendiri di konsumen bila dipakai. */
+  /** Optional Google Fonts stylesheet URL — inject it yourself in the consumer if used. */
   fontHref?: string;
-  /** Nilai custom properties tema ini. Terapkan lewat `getThemeStyle()` atau langsung. */
+  /** This theme's custom property values. Apply via `getThemeStyle()` or directly. */
   vars: ChartVars;
 }
 
@@ -65,7 +64,6 @@ export const THEME_ORDER: ThemeId[] = [
   'industrial',
   'government',
   'startup',
-  'ormas',
 ];
 
 const GF = (query: string) => `https://fonts.googleapis.com/css2?${query}&display=swap`;
@@ -74,7 +72,7 @@ export const THEMES: Record<ThemeId, OrgChartTheme> = {
   default: {
     id: 'default',
     label: 'Default',
-    description: 'Tampilan bawaan komponen — netral, tanpa styling tambahan.',
+    description: 'Default component look — neutral, no extra styling.',
     vars: {},
   },
 
@@ -82,7 +80,7 @@ export const THEMES: Record<ThemeId, OrgChartTheme> = {
     id: 'saas',
     label: 'Product / SaaS',
     description:
-      'Aksen indigo, kartu bulat dengan shadow lembut — landing page komponen yang ramah.',
+      'Indigo accent, rounded cards with a soft shadow — a friendly component landing page.',
     fontHref: GF('family=Sora:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700'),
     vars: {
       '--orgchart-font': "'Plus Jakarta Sans', system-ui, sans-serif",
@@ -106,7 +104,7 @@ export const THEMES: Record<ThemeId, OrgChartTheme> = {
   devDark: {
     id: 'devDark',
     label: 'Developer Dark',
-    description: 'Dark mode, monospace, aksen emerald — untuk audiens npm/GitHub.',
+    description: 'Dark mode, monospace, emerald accent — for an npm/GitHub audience.',
     fontHref: GF('family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600'),
     vars: {
       '--orgchart-font': "'JetBrains Mono', ui-monospace, monospace",
@@ -132,7 +130,7 @@ export const THEMES: Record<ThemeId, OrgChartTheme> = {
   editorial: {
     id: 'editorial',
     label: 'Editorial Minimal',
-    description: 'Kertas hangat, judul serif, garis tipis — kesan dokumentasi yang tenang.',
+    description: 'Warm paper tone, serif headings, thin lines — a calm, documentation-like feel.',
     fontHref: GF('family=Newsreader:wght@500;600&family=Work+Sans:wght@400;500;600'),
     vars: {
       '--orgchart-font': "'Work Sans', system-ui, sans-serif",
@@ -158,8 +156,7 @@ export const THEMES: Record<ThemeId, OrgChartTheme> = {
   corporate: {
     id: 'corporate',
     label: 'Corporate',
-    description:
-      'Navy & putih, rapi dan formal — untuk intranet perusahaan atau laporan enterprise.',
+    description: 'Navy & white, clean and formal — for a company intranet or enterprise report.',
     fontHref: GF('family=IBM+Plex+Sans:wght@400;500;600;700'),
     vars: {
       '--orgchart-font': "'IBM Plex Sans', system-ui, sans-serif",
@@ -183,7 +180,7 @@ export const THEMES: Record<ThemeId, OrgChartTheme> = {
   industrial: {
     id: 'industrial',
     label: 'Industrial',
-    description: 'Beton & oranye safety, garis tebal — kesan pabrik/manufaktur yang kokoh.',
+    description: 'Concrete & safety orange, thick lines — a sturdy factory/manufacturing feel.',
     fontHref: GF('family=Oswald:wght@500;600;700&family=Barlow:wght@400;500;600'),
     vars: {
       '--orgchart-font': "'Barlow', system-ui, sans-serif",
@@ -208,8 +205,8 @@ export const THEMES: Record<ThemeId, OrgChartTheme> = {
 
   government: {
     id: 'government',
-    label: 'Instansi (Government)',
-    description: 'Putih & merah maroon, serif formal — gaya kop surat instansi resmi.',
+    label: 'Government',
+    description: 'White & maroon red, formal serif — official-letterhead government style.',
     fontHref: GF('family=Noto+Serif:wght@500;600;700&family=PT+Sans:wght@400;700'),
     vars: {
       '--orgchart-font': "'PT Sans', system-ui, sans-serif",
@@ -234,7 +231,7 @@ export const THEMES: Record<ThemeId, OrgChartTheme> = {
   startup: {
     id: 'startup',
     label: 'Startup',
-    description: 'Ungu-cyan energik, radius besar, bayangan berwarna — kesan produk startup.',
+    description: 'Energetic purple-cyan, large radius, colorful shadow — a startup-product feel.',
     fontHref: GF('family=Outfit:wght@500;600;700;800'),
     vars: {
       '--orgchart-font': "'Outfit', system-ui, sans-serif",
@@ -255,38 +252,12 @@ export const THEMES: Record<ThemeId, OrgChartTheme> = {
       '--orgchart-gap-half': '24px',
     },
   },
-
-  ormas: {
-    id: 'ormas',
-    label: 'Ormas',
-    description:
-      'Merah-putih dengan aksen emas, judul tegas — gaya spanduk/kop organisasi masyarakat.',
-    fontHref: GF('family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700'),
-    vars: {
-      '--orgchart-font': "'Plus Jakarta Sans', system-ui, sans-serif",
-      '--orgchart-card-bg': '#ffffff',
-      '--orgchart-card-border': 'oklch(50% 0.19 25)',
-      '--orgchart-card-radius': '6px',
-      '--orgchart-card-shadow': '0 2px 0 oklch(75% 0.14 85)',
-      '--orgchart-line-color': 'oklch(25% 0.01 80)',
-      '--orgchart-line-width': '3px',
-      '--orgchart-avatar-bg': 'oklch(50% 0.19 25)',
-      '--orgchart-avatar-fg': '#ffffff',
-      '--orgchart-name-color': 'oklch(18% 0.01 80)',
-      '--orgchart-title-color': 'oklch(45% 0.01 80)',
-      '--orgchart-focus-color': 'oklch(50% 0.19 25)',
-      '--orgchart-highlight-color': 'oklch(75% 0.14 85)',
-      '--orgchart-toggle-bg': 'oklch(50% 0.19 25)',
-      '--orgchart-toggle-fg': '#ffffff',
-      '--orgchart-toggle-hover-bg': 'oklch(42% 0.18 25)',
-    },
-  },
 };
 
 /**
- * Ambil style object siap-pakai untuk tema tertentu — tinggal taruh di
- * container mana pun yang membungkus <OrgChart> (custom property mengalir
- * lewat CSS inheritance):
+ * Gets a ready-to-use style object for a given theme — just place it on
+ * any container wrapping <OrgChart> (the custom properties flow via
+ * CSS inheritance):
  *
  * ```tsx
  * <div style={getThemeStyle('startup')}>

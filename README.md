@@ -30,12 +30,12 @@ Collapse/expand per node dengan badge jumlah bawahan · multiple roots (multi-co
 ## Menjalankan demo
 
 ```bash
-npm install
-npm run dev        # demo Vite: 2 company ±50 node, dataset kotor, search, zoom
-npm test           # 32 unit + component test
-npm run bench      # benchmark buildTree & render
-npm run build:lib  # → dist-lib/ (index.js + index.d.ts + style.css)
-npm run visuals    # regenerate screenshot/GIF README (butuh npx playwright install chromium)
+pnpm install
+pnpm dev        # demo Vite: 2 company ±50 node, dataset kotor, search, zoom
+pnpm test           # 32 unit + component test
+pnpm bench      # benchmark buildTree & render
+pnpm build:lib  # → dist-lib/ (index.js + index.d.ts + style.css)
+pnpm visuals    # regenerate screenshot/GIF README (butuh npx playwright install chromium)
 ```
 
 ## Format data
@@ -161,7 +161,7 @@ Meng-capture tree yang sedang ter-render (node visible saja — subtree collapse
 
 ## Performa (terukur, bukan klaim)
 
-`npm run bench` — renderToString, Linux container (angka mean):
+`pnpm run bench` — renderToString, Linux container (angka mean):
 
 | Skenario | Hasil | Target NFR-1 |
 |---|---|---|

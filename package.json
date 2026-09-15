@@ -1,6 +1,7 @@
 {
   "name": "org-hierarchy-tree",
   "version": "1.0.0",
+  "packageManager": "pnpm@12.4.1",
   "description": "Reusable React org hierarchy tree component — flat data in, org chart out",
   "type": "module",
   "license": "MIT",

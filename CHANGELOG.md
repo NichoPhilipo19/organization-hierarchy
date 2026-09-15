@@ -1,13 +1,16 @@
 # Changelog
 
-Format mengikuti [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versi di sini adalah milestone historis dari `git log` dan `ANALYSIS.md`, bukan tag rilis npm — paket belum pernah dipublish (lihat Roadmap di README).
+Format mengikuti [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versi ≤1.1.0 adalah milestone historis dari `git log` dan `ANALYSIS.md`, dari sebelum paket pernah dipublish ke npm; mulai 1.2.0 nomor versi di sini mengikuti tag rilis npm yang sebenarnya.
 
 ## [Unreleased]
 
-Kesiapan publish npm, plus gap testing/CI yang dicatat di `ANALYSIS.md` §5.
+## [1.2.0] — 2026-09-15
+
+Publish pertama ke npm registry. Isinya: kesiapan publish yang dicatat di `ANALYSIS.md` §5, preset tema + dummy avatar di demo, dan migrasi tooling (pnpm, Biome, Ladle).
 
 ### Added
 
+- Script `prepublishOnly` (`pnpm build:lib`) supaya `dist-lib` nggak pernah ke-publish basi/kosong kalau lupa build manual dulu. Section "Instalasi" di README (`npm install org-hierarchy-tree`).
 - `OrgChartHandle.exportToPng(filename?)` — export tree yang sedang ter-render (node visible saja, lepas dari zoom/pan saat ini) ke file PNG via `html-to-image`, di-dynamic-import supaya konsumen yang tidak memakainya tidak menanggung cost bundle-nya. Tombol "Export PNG" ditambah di demo. Lihat `TECHNICAL_DESIGN.md` §7b dan `PRD.md` §12 (FR-12).
 - `LICENSE` (MIT) dan metadata publish di `package.json`: `repository`, `homepage`, `bugs`, `author`, `keywords`, `sideEffects: ["*.css"]`.
 - `'use client'` di `OrgChart.tsx` buat kompatibilitas React Server Components / Next.js App Router. Dipertahankan lewat Rollup output banner supaya nggak ke-strip pas build.
@@ -19,6 +22,10 @@ Kesiapan publish npm, plus gap testing/CI yang dicatat di `ANALYSIS.md` §5.
 - Migrasi package manager npm → pnpm: `pnpm-lock.yaml` + `pnpm-workspace.yaml`, `package.json` dapat field `packageManager`, CI (`ci.yml`, `deploy-demo.yml`) pakai `pnpm/action-setup`. Command di README diganti dari `npm ...` ke `pnpm ...`.
 - Biome sebagai linter + formatter (belum ada sebelumnya): `biome.json`, script `lint`/`format`/`check`, dan `pnpm exec biome check .` ditambahkan ke CI. Beberapa gap a11y kecil dibenerin (`type="button"` yang kelewat, key React yang stabil, dll); empat temuan lain yang sebetulnya bagian dari pola ARIA treeview yang disengaja (roving tabindex) di-suppress dengan `biome-ignore` + alasan, bukan direfactor paksa.
 - Component workshop pakai [Ladle](https://ladle.dev) (`src/lib/OrgChart.stories.tsx`) — 5 story terpisah: `Default`, `ThemePicker` (switch 9 preset tema lewat control), `CustomRenderNode`, `DirtyData`, `ZoomAndPan`. Script `pnpm story` (dev, cold start ~1 detik) dan `pnpm story:build` (dicek juga di CI).
+
+### Fixed
+
+- `vite-plugin-dts` ikut nge-generate `.d.ts` untuk `OrgChart.stories.tsx` dan nyelip ke `dist-lib` (ketauan pas `npm pack --dry-run` sebelum publish pertama) — `vite.lib.config.ts` sekarang exclude `**/*.stories.*` juga, sama kayak `*.test.*`.
 
 ## [1.1.0] — 2026-08-06
 

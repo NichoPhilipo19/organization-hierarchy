@@ -1,6 +1,6 @@
 {
   "name": "org-hierarchy-tree",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "packageManager": "pnpm@12.4.1",
   "description": "Reusable React org hierarchy tree component — flat data in, org chart out",
   "type": "module",
@@ -44,6 +44,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "build:lib": "vite build --config vite.lib.config.ts",
+    "prepublishOnly": "pnpm build:lib",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

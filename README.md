@@ -10,6 +10,16 @@ Komponen React reusable untuk merender hierarchy organisasi dari **data flat** �
 
 ![Demo interaksi — collapse/expand, search highlight, zoom & pan](docs/demo.gif)
 
+## Instalasi
+
+```bash
+npm install org-hierarchy-tree
+# atau: pnpm add org-hierarchy-tree
+# atau: yarn add org-hierarchy-tree
+```
+
+`react` dan `react-dom` >=18 adalah peer dependency (tidak ikut ke-install otomatis).
+
 ```tsx
 import { OrgChart } from 'org-hierarchy-tree';
 import 'org-hierarchy-tree/style.css'; // wajib — CSS tidak ter-inject otomatis

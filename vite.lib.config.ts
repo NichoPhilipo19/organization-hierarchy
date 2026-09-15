@@ -11,7 +11,7 @@ export default defineConfig({
     dts({
       include: ['src/lib'],
       entryRoot: 'src/lib',
-      exclude: ['src/lib/**/*.test.*'],
+      exclude: ['src/lib/**/*.test.*', 'src/lib/**/*.stories.*'],
     }),
   ],
   build: {

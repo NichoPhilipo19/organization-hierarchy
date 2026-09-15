@@ -245,6 +245,9 @@ Konsekuensinya: `exportToPng` tidak butuh opsi `fitContent` — hasilnya selalu 
 3. **v2.1** — ~~search/highlight node~~ ✅ **Selesai** (prop `highlightedIds` + `state.isHighlighted` + helper `ancestorsOf()` untuk auto-expand path). ~~Export PNG~~ ✅ **Selesai** (§7b; `OrgChartHandle.exportToPng()`, `html-to-image` dynamic import).
 4. Helper `fromNested()` (disebut §1) ✅ **Selesai** — `helpers.ts`, dengan unit test.
 5. **Backlog berikutnya:** radial view SVG, publish npm (nama package = PRD OQ-1), visual regression test (Playwright) untuk connector CSS.
+6. ~~**Wishlist tooling:** migrasi package manager npm → pnpm.~~ ✅ **Selesai 15 Sep 2026** — `pnpm-lock.yaml` + `pnpm-workspace.yaml` (`allowBuilds`), `package.json` `packageManager` field, CI (`ci.yml`, `deploy-demo.yml`) pakai `pnpm/action-setup`. Script `npm run *` di README diganti `pnpm *`.
+7. ~~**Wishlist tooling:** adopsi Biome buat lint + format.~~ ✅ **Selesai 15 Sep 2026** — `biome.json` (2-space, single quote, `organizeImports`), script `lint`/`format`/`check`, dijalankan di CI (`pnpm exec biome check .`). Rule `noNonNullAssertion` & `noDescendingSpecificity` di-off (lihat komentar di `biome.json`); empat temuan a11y di pola ARIA treeview (`role="tree"`/`role="group"`, klik node) di-suppress inline dengan `biome-ignore` + alasan, karena keyboard handling-nya sudah ditangani lewat roving tabindex di `onTreeKeyDown` — bukan gap sungguhan.
+8. ~~**Wishlist tooling:** component showcase buat lib ini.~~ ✅ **Selesai 15 Sep 2026** — pilih **Ladle** (bukan Storybook): cold start ~1 detik cocok buat project sekecil ini, dan Vite-based jadi konsisten sama demo app + toolchain lain (pnpm, Biome) yang sama-sama dipilih karena cepat. `src/lib/OrgChart.stories.tsx` — 5 story terpisah: `Default`, `ThemePicker` (control `select` atas `THEME_ORDER`), `CustomRenderNode`, `DirtyData` (nampilin `onDataError`), `ZoomAndPan`. Jalankan `pnpm story` (dev) / `pnpm story:build` (dicek juga di CI).
 
 ---
 

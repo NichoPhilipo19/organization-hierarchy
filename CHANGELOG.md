@@ -1,64 +1,68 @@
 # Changelog
 
-Format mengikuti [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versi ≤1.1.0 adalah milestone historis dari `git log` dan `ANALYSIS.md`, dari sebelum paket pernah dipublish ke npm; mulai 1.2.0 nomor versi di sini mengikuti tag rilis npm yang sebenarnya.
+Follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions ≤1.1.0 are historical milestones reconstructed from `git log` and `ANALYSIS.md`, from before the package was ever published to npm; starting at 1.2.0 the version numbers here track actual npm release tags.
 
 ## [Unreleased]
 
+### Removed
+
+- The `ormas` theme preset — removed from `THEMES`/`THEME_ORDER` (a breaking change for anyone already using `getThemeStyle('ormas')`; it never shipped in a published version, so this is safe).
+
 ## [1.2.0] — 2026-09-15
 
-Publish pertama ke npm registry. Isinya: kesiapan publish yang dicatat di `ANALYSIS.md` §5, preset tema + dummy avatar di demo, dan migrasi tooling (pnpm, Biome, Ladle).
+First publish to the npm registry. Includes: publish readiness tracked in `ANALYSIS.md` §5, theme presets + dummy avatars in the demo, and tooling migration (pnpm, Biome, Ladle).
 
 ### Added
 
-- Script `prepublishOnly` (`pnpm build:lib`) supaya `dist-lib` nggak pernah ke-publish basi/kosong kalau lupa build manual dulu. Section "Instalasi" di README (`npm install org-hierarchy-tree`).
-- `OrgChartHandle.exportToPng(filename?)` — export tree yang sedang ter-render (node visible saja, lepas dari zoom/pan saat ini) ke file PNG via `html-to-image`, di-dynamic-import supaya konsumen yang tidak memakainya tidak menanggung cost bundle-nya. Tombol "Export PNG" ditambah di demo. Lihat `TECHNICAL_DESIGN.md` §7b dan `PRD.md` §12 (FR-12).
-- `LICENSE` (MIT) dan metadata publish di `package.json`: `repository`, `homepage`, `bugs`, `author`, `keywords`, `sideEffects: ["*.css"]`.
-- `'use client'` di `OrgChart.tsx` buat kompatibilitas React Server Components / Next.js App Router. Dipertahankan lewat Rollup output banner supaya nggak ke-strip pas build.
-- Test buat `ZoomPane`: zoom in/out, reset, drag-to-pan, dan regresi `onClickCapture` vs `onNodeClick`. Sebelumnya belum ada test sama sekali buat interaksi ini.
-- `.github/workflows/ci.yml` — jalan tiap push dan PR ke `main`, cuma verifikasi. `deploy-demo.yml` tetap yang pegang deploy Pages.
-- README sekarang link ke `PRD.md`, `TECHNICAL_DESIGN.md`, `ANALYSIS.md`, dan changelog ini sendiri baru ditambahin.
-- Preset tema (`THEMES`, `THEME_ORDER`, `getThemeStyle()`) di-export dari lib: `default`, `saas`, `devDark`, `editorial`, `corporate`, `industrial`, `government`, `startup`, `ormas` — masing-masing cuma kumpulan nilai custom property `--orgchart-*`, jadi konsumen bisa pakai langsung atau bikin preset sendiri dengan bentuk yang sama tanpa menyentuh kode komponen. Demo dapat theme switcher yang persist pilihannya ke `localStorage`. Dua custom property baru (`--orgchart-avatar-radius`, `--orgchart-line-width`) ditambah di `OrgChart.module.css`, default-nya sama seperti sebelumnya jadi backward-compatible.
-- Demo: sebagian node di `sampleData` diberi `avatarUrl` dummy (SVG dari DiceBear, deterministic per id) — sengaja cuma sebagian, supaya kartu dengan foto vs kartu yang masih fallback ke inisial (`NodeCard`, FR-9) sama-sama kelihatan di live demo.
-- Migrasi package manager npm → pnpm: `pnpm-lock.yaml` + `pnpm-workspace.yaml`, `package.json` dapat field `packageManager`, CI (`ci.yml`, `deploy-demo.yml`) pakai `pnpm/action-setup`. Command di README diganti dari `npm ...` ke `pnpm ...`.
-- Biome sebagai linter + formatter (belum ada sebelumnya): `biome.json`, script `lint`/`format`/`check`, dan `pnpm exec biome check .` ditambahkan ke CI. Beberapa gap a11y kecil dibenerin (`type="button"` yang kelewat, key React yang stabil, dll); empat temuan lain yang sebetulnya bagian dari pola ARIA treeview yang disengaja (roving tabindex) di-suppress dengan `biome-ignore` + alasan, bukan direfactor paksa.
-- Component workshop pakai [Ladle](https://ladle.dev) (`src/lib/OrgChart.stories.tsx`) — 5 story terpisah: `Default`, `ThemePicker` (switch 9 preset tema lewat control), `CustomRenderNode`, `DirtyData`, `ZoomAndPan`. Script `pnpm story` (dev, cold start ~1 detik) dan `pnpm story:build` (dicek juga di CI).
+- `prepublishOnly` script (`pnpm build:lib`) so `dist-lib` can never go out stale or empty if the manual build step is forgotten. An "Installation" section in the README (`npm install org-hierarchy-tree`).
+- `OrgChartHandle.exportToPng(filename?)` — exports the currently rendered tree (visible nodes only, independent of the current zoom/pan) to a PNG file via `html-to-image`, dynamically imported so consumers who don't use it don't pay its bundle cost. An "Export PNG" button was added to the demo. See `TECHNICAL_DESIGN.md` §7b and `PRD.md` §12 (FR-12).
+- `LICENSE` (MIT) and publish metadata in `package.json`: `repository`, `homepage`, `bugs`, `author`, `keywords`, `sideEffects: ["*.css"]`.
+- `'use client'` in `OrgChart.tsx` for React Server Components / Next.js App Router compatibility. Preserved through a Rollup output banner so it doesn't get stripped during the build.
+- Tests for `ZoomPane`: zoom in/out, reset, drag-to-pan, and a regression test for `onClickCapture` vs `onNodeClick`. There were previously no tests at all for this interaction.
+- `.github/workflows/ci.yml` — runs on every push and PR to `main`, verification only. `deploy-demo.yml` remains the only workflow that deploys to Pages.
+- The README now links to `PRD.md`, `TECHNICAL_DESIGN.md`, `ANALYSIS.md`, and this changelog, which was newly added.
+- Theme presets (`THEMES`, `THEME_ORDER`, `getThemeStyle()`) exported from the lib: `default`, `saas`, `devDark`, `editorial`, `corporate`, `industrial`, `government`, `startup` — each just a bundle of `--orgchart-*` custom property values, so consumers can use them directly or build their own preset in the same shape without touching the component code. The demo gets a theme switcher that persists its choice to `localStorage`. Two new custom properties (`--orgchart-avatar-radius`, `--orgchart-line-width`) were added to `OrgChart.module.css`, with defaults matching the previous look so it's backward-compatible.
+- Demo: some nodes in `sampleData` were given a dummy `avatarUrl` (DiceBear SVG, deterministic per id) — intentionally only some of them, so both the photo and initials-fallback card states (`NodeCard`, FR-9) are visible in the live demo at once.
+- Migrated the package manager from npm to pnpm: `pnpm-lock.yaml` + `pnpm-workspace.yaml`, `package.json` gained a `packageManager` field, CI (`ci.yml`, `deploy-demo.yml`) now uses `pnpm/action-setup`. Commands in the README changed from `npm ...` to `pnpm ...`.
+- Biome as linter + formatter (there was none before): `biome.json`, `lint`/`format`/`check` scripts, and `pnpm exec biome check .` added to CI. A few small a11y gaps were fixed (a missed `type="button"`, a stable React key, etc.); four other findings that are actually part of an intentional ARIA treeview pattern (roving tabindex) were suppressed with `biome-ignore` + a reason, rather than force-refactored away.
+- Component workshop using [Ladle](https://ladle.dev) (`src/lib/OrgChart.stories.tsx`) — 5 separate stories: `Default`, `ThemePicker` (switch between the 8 theme presets via a control), `CustomRenderNode`, `DirtyData`, `ZoomAndPan`. `pnpm story` script (dev, ~1s cold start) and `pnpm story:build` (also checked in CI).
 
 ### Fixed
 
-- `vite-plugin-dts` ikut nge-generate `.d.ts` untuk `OrgChart.stories.tsx` dan nyelip ke `dist-lib` (ketauan pas `npm pack --dry-run` sebelum publish pertama) — `vite.lib.config.ts` sekarang exclude `**/*.stories.*` juga, sama kayak `*.test.*`.
+- `vite-plugin-dts` was also generating a `.d.ts` for `OrgChart.stories.tsx` and letting it leak into `dist-lib` (caught via `npm pack --dry-run` before the first publish) — `vite.lib.config.ts` now excludes `**/*.stories.*` too, same as `*.test.*`.
 
 ## [1.1.0] — 2026-08-06
 
-Batch besar menyusul resolusi addendum `ANALYSIS.md` §6 (T-1 s/d T-8).
+A large batch following the resolution of the `ANALYSIS.md` §6 addendum (T-1 through T-8).
 
 ### Added
 
-- 13 component test baru (jsdom + Testing Library) menutup FR-4/5/6/8/9 yang sebelumnya untested.
-- Keyboard navigation penuh sesuai pola [WAI-ARIA tree](https://www.w3.org/WAI/ARIA/apg/patterns/treeview/): roving tabindex, arrow keys, `aria-level`/`aria-setsize`/`aria-posinset`.
-- Zoom & pan (`ZoomPane`) — scroll untuk zoom-to-cursor, drag untuk pan, tombol overlay.
+- 13 new component tests (jsdom + Testing Library) closing out FR-4/5/6/8/9, which were previously untested.
+- Full keyboard navigation following the [WAI-ARIA tree](https://www.w3.org/WAI/ARIA/apg/patterns/treeview/) pattern: roving tabindex, arrow keys, `aria-level`/`aria-setsize`/`aria-posinset`.
+- Zoom & pan (`ZoomPane`) — scroll to zoom-to-cursor, drag to pan, overlay buttons.
 - Search highlight (`highlightedIds`, `state.isHighlighted`).
 - `OrgChartHandle` (`expandAll()`/`collapseAll()` via ref).
-- `fromNested()` dan `ancestorsOf()` helper (dicatat sebagai amendment di PRD §11).
-- Benchmark harness (`npm run bench`) — mengukur `buildTree` dan render alih-alih klaim performa tanpa bukti.
-- Screenshot & GIF demo (Playwright, `npm run visuals`) untuk verifikasi visual connector CSS.
+- `fromNested()` and `ancestorsOf()` helpers (recorded as an amendment in PRD §11).
+- Benchmark harness (`npm run bench`) — measures `buildTree` and render instead of claiming performance without evidence.
+- Demo screenshot & GIF (Playwright, `npm run visuals`) for visually verifying the connector CSS.
 
 ### Fixed
 
-- `onDataError` terpanggil berulang tiap render saat konsumen menulis callback inline — kini disimpan di ref, effect hanya ter-trigger oleh `errors`.
-- `defaultExpandedDepth` tidak diterapkan ulang saat identitas `data` berubah (uncontrolled mode) — kini didefinisikan & diimplementasikan ulang.
-- `justify-content: center` pada scroll container membuat sisi kiri chart lebar tidak ter-scroll (ditemukan saat verifikasi visual) — diganti `.root { width: max-content; margin: 0 auto }`.
-- `vite-plugin-dts` ditambahkan sehingga field `types` di `package.json` tidak lagi menunjuk file yang tidak pernah dihasilkan.
+- `onDataError` was being called repeatedly on every render when a consumer wrote the callback inline — now stored in a ref, so the effect only triggers on actual `errors` changes.
+- `defaultExpandedDepth` wasn't re-applied when the identity of `data` changed (uncontrolled mode) — now defined and re-implemented properly.
+- `justify-content: center` on the scroll container made the left side of a wide chart unreachable by scrolling (found during visual verification) — replaced with `.root { width: max-content; margin: 0 auto }`.
+- `vite-plugin-dts` was added so the `types` field in `package.json` no longer points at a file that was never generated.
 
 ## [1.0.0] — 2026-07-15
 
-Rilis awal.
+Initial release.
 
 ### Added
 
-- `<OrgChart data={OrgNode[]} />` dari flat array — multi-root (multi-company), bukan hanya single tree.
-- Collapse/expand per node dengan badge jumlah bawahan, terpisah dari `onNodeClick`.
-- Controlled (`expandedIds`/`onExpandedChange`) dan uncontrolled (`defaultExpandedDepth`) expand state via `useExpansion`.
-- `renderNode` override penuh dengan `NodeState` (isExpanded, hasChildren, childCount, depth).
-- Validasi data kotor (orphan → jadi root, cycle → satu edge diputus, duplicate id → yang pertama menang) via `buildTree`, dilaporkan lewat `onDataError`.
-- Kartu default (`NodeCard`), zero-config.
-- Pemisahan logic dari view (`buildTree`, `useExpansion` bebas DOM) — seluruh test lapisan data jalan di environment `node` tanpa jsdom.
+- `<OrgChart data={OrgNode[]} />` from a flat array — multi-root (multi-company), not just a single tree.
+- Per-node collapse/expand with a direct-report count badge, separate from `onNodeClick`.
+- Controlled (`expandedIds`/`onExpandedChange`) and uncontrolled (`defaultExpandedDepth`) expand state via `useExpansion`.
+- Full `renderNode` override with `NodeState` (isExpanded, hasChildren, childCount, depth).
+- Dirty-data validation (orphan → becomes a root, cycle → one edge is cut, duplicate id → the first one wins) via `buildTree`, reported through `onDataError`.
+- Default card (`NodeCard`), zero-config.
+- Logic separated from the view (`buildTree`, `useExpansion` are DOM-free) — the entire data-layer test suite runs in the `node` environment without jsdom.

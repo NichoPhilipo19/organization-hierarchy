@@ -1,148 +1,149 @@
-# Analisis Mendalam — PRD × Technical Design × Implementasi
+# In-Depth Analysis — PRD × Technical Design × Implementation
 
-**Tanggal:** 15 Juli 2026 · **Artefak yang dianalisis:** [PRD.md](PRD.md), [TECHNICAL_DESIGN.md](TECHNICAL_DESIGN.md), source code `src/`
+**Date:** July 15, 2026 · **Artifacts analyzed:** [PRD.md](PRD.md), [TECHNICAL_DESIGN.md](TECHNICAL_DESIGN.md), source code `src/`
 
-Analisis ini memeriksa tiga hal: apakah ketiga artefak konsisten satu sama lain, apakah yang dijanjikan benar-benar terverifikasi, dan kelemahan nyata yang tersisa, termasuk yang tidak kelihatan dari luar.
+This analysis examines three things: whether the three artifacts are consistent with each other, whether what was promised has actually been verified, and what real weaknesses remain — including ones that aren't visible from the outside.
 
 ---
 
-## 1. Hasil Verifikasi Objektif
+## 1. Objective Verification Results
 
-| Pemeriksaan | Hasil |
+| Check | Result |
 |---|---|
-| `tsc --noEmit` (strict mode) | ✅ 0 error |
-| `vitest run` | ✅ 12/12 lulus |
-| `vite build` (demo) | ✅ 153 kB (49.5 kB gzip, termasuk React) |
-| `vite build --config vite.lib.config.ts` | ✅ **6.38 kB → 2.32 kB gzip** — library-nya sendiri sangat kecil |
-| Runtime dependency | ✅ 0 — hanya `peerDependencies` React (G4 terpenuhi) |
+| `tsc --noEmit` (strict mode) | ✅ 0 errors |
+| `vitest run` | ✅ 12/12 passing |
+| `vite build` (demo) | ✅ 153 kB (49.5 kB gzip, including React) |
+| `vite build --config vite.lib.config.ts` | ✅ **6.38 kB → 2.32 kB gzip** — the library itself is very small |
+| Runtime dependency | ✅ 0 — only a React `peerDependencies` entry (G4 satisfied) |
 
-## 2. Traceability: PRD → Design → Kode → Test
+## 2. Traceability: PRD → Design → Code → Tests
 
-| PRD | Design | Kode | Test/Bukti | Status |
+| PRD | Design | Code | Test/Evidence | Status |
 |---|---|---|---|---|
 | FR-1 flat input | §1 | `types.ts OrgNode` | tsc | ✅ |
 | FR-2 multi-root | §1, §7 | `buildTree` roots[] | test "multi-company" + `.root` CSS gap | ✅ |
-| FR-3 default depth | §3 | `idsUpToDepth`, default 1 | 3 test `idsUpToDepth` | ✅ |
-| FR-4 toggle terpisah dari klik | §2 | `TreeView` button + `stopPropagation` | — (belum ada test interaksi) | ⚠️ implemented, untested |
-| FR-5 badge count | §3 | `{children.length}` saat collapsed | — | ⚠️ implemented, untested |
-| FR-6 controlled/uncontrolled | §2, §3 | `useExpansion` | — (hanya dipakai demo) | ⚠️ implemented, untested |
-| FR-7 dirty data | §1 tabel validasi | `buildTree` | 5 test (orphan, dup, 2-cycle, self-cycle, cycle+subtree) | ✅ paling teruji |
+| FR-3 default depth | §3 | `idsUpToDepth`, default 1 | 3 tests for `idsUpToDepth` | ✅ |
+| FR-4 toggle separate from click | §2 | `TreeView` button + `stopPropagation` | — (no interaction test yet) | ⚠️ implemented, untested |
+| FR-5 badge count | §3 | `{children.length}` when collapsed | — | ⚠️ implemented, untested |
+| FR-6 controlled/uncontrolled | §2, §3 | `useExpansion` | — (only used in the demo) | ⚠️ implemented, untested |
+| FR-7 dirty data | §1 validation table | `buildTree` | 5 tests (orphan, duplicate, 2-cycle, self-cycle, cycle+subtree) | ✅ most thoroughly tested |
 | FR-8 renderNode + state | §2 | `NodeState`, `Branch` | — | ⚠️ |
-| FR-9 kartu default | §5 | `NodeCard` | — | ⚠️ |
+| FR-9 default card | §5 | `NodeCard` | — | ⚠️ |
 | FR-10 collapsed ≠ rendered | §3 | `{isExpanded && <ul>}` | by construction | ✅ |
-| NFR-1 performa (<100ms/<16ms) | §3 klaim | — | **tidak diukur** | ❌ klaim tanpa bukti |
-| NFR-3 type safety | — | strict, no `any` publik | tsc | ✅ |
-| NFR-4 a11y (P1) | §6 | role/aria/button | — | 🟡 parsial (lihat T-3) |
-| NFR-6 logic terpisah dari view | §4 diagram | buildTree & hooks bebas DOM | test jalan di env `node` tanpa jsdom — bukti nyata pemisahan | ✅ |
+| NFR-1 performance (<100ms/<16ms) | §3 claim | — | **not measured** | ❌ claim without evidence |
+| NFR-3 type safety | — | strict, no public `any` | tsc | ✅ |
+| NFR-4 a11y (P1) | §6 | role/aria/button | — | 🟡 partial (see T-3) |
+| NFR-6 logic separated from view | §4 diagram | buildTree & hooks are DOM-free | tests run in the `node` environment without jsdom — concrete proof of the separation | ✅ |
 
-**Pola yang terlihat:** lapisan *data* (buildTree) teruji menyeluruh; lapisan *interaksi* (toggle, controlled mode, renderNode) sama sekali belum punya test otomatis. Ini konsisten dengan keputusan NFR-6 (logic dipisah supaya testable tanpa DOM) — tapi artinya coverage berhenti tepat di batas itu.
+**Pattern observed:** the *data* layer (buildTree) is thoroughly tested; the *interaction* layer (toggle, controlled mode, renderNode) has no automated tests at all. This is consistent with the NFR-6 decision (logic separated so it's testable without the DOM) — but it means coverage stops exactly at that boundary.
 
-## 3. Temuan — Diurutkan dari Paling Serius
+## 3. Findings — Ordered by Severity
 
-### T-1 · `types` di package.json menunjuk file yang tidak pernah dibuat — **Critical untuk publish, kosmetik untuk demo**
+### T-1 · `types` in package.json points to a file that was never generated — **Critical for publishing, cosmetic for the demo**
 
-`package.json` mendeklarasikan `"types": "./dist-lib/index.d.ts"`, tapi `build:lib` tidak menghasilkan `.d.ts` (tsconfig `noEmit`, tidak ada `vite-plugin-dts`). Konsumen yang meng-install library ini akan kehilangan seluruh TypeScript surface — padahal "fully typed API" adalah NFR-3 dan nilai jual utama. Tidak terdeteksi test mana pun karena tidak ada langkah yang mengonsumsi hasil build.
-**Konteks:** PRD Non-Goals menyatakan "publish ke npm" bukan target v1, jadi ini bukan pelanggaran requirement — tapi field yang menunjuk file fiktif lebih buruk daripada tidak ada field. **Fix:** tambah `vite-plugin-dts`, atau hapus field `types` sampai v1.1.
+`package.json` declares `"types": "./dist-lib/index.d.ts"`, but `build:lib` doesn't generate a `.d.ts` file (tsconfig has `noEmit`, and there's no `vite-plugin-dts`). Consumers who install this library lose the entire TypeScript surface — even though a "fully typed API" is NFR-3 and the library's main selling point. No test catches this because nothing consumes the build output.
+**Context:** the PRD's Non-Goals state that "publishing to npm" isn't a v1 target, so this isn't a requirement violation — but a field pointing to a fictitious file is worse than no field at all. **Fix:** add `vite-plugin-dts`, or remove the `types` field until v1.1.
 
-### T-2 · `onDataError` bisa terpanggil berulang setiap render — **High, bug API nyata**
+### T-2 · `onDataError` can fire repeatedly on every render — **High, a real API bug**
 
-`OrgChart.tsx` memanggil `onDataError` di `useEffect` dengan dependency `[errors, onDataError]`. `errors` stabil (dari `useMemo`), tapi jika konsumen menulis `onDataError={(e) => ...}` inline — pola paling umum — referensi fungsi berubah setiap render, effect re-fire, callback terpanggil terus-menerus. Demo tidak memperlihatkan bug ini karena kebetulan pakai `useCallback`. **Ini jenis bug yang lolos justru karena penulis demo adalah penulis library.** Fix standar: simpan callback di ref (`useEffectEvent` pattern) sehingga hanya `errors` yang men-trigger.
+`OrgChart.tsx` calls `onDataError` inside a `useEffect` with dependencies `[errors, onDataError]`. `errors` is stable (from `useMemo`), but if a consumer writes `onDataError={(e) => ...}` inline — the most common pattern — the function reference changes on every render, the effect re-fires, and the callback keeps getting called. The demo doesn't surface this bug because it happens to use `useCallback`. **This is exactly the kind of bug that slips through because the demo's author is also the library's author.** Standard fix: store the callback in a ref (the `useEffectEvent` pattern) so only `errors` triggers it.
 
-### T-3 · Klaim accessibility melebihi implementasi — **Medium**
+### T-3 · Accessibility claims exceed the implementation — **Medium**
 
-PRD US-8 dan Design §6 menjanjikan "tree ARIA + keyboard-operable". Realitas: `role="tree/treeitem/group"` dan `aria-expanded` ada, toggle adalah `<button>` asli (Enter/Space gratis). Tapi pattern [WAI-ARIA tree](https://www.w3.org/WAI/ARIA/apg/patterns/treeview/) menuntut lebih: roving tabindex, `aria-level`, arrow-key navigation. Screen reader akan mengumumkan struktur yang setengah jadi — kadang lebih membingungkan daripada markup polos. US-8 memang P1 ("diusahakan"), jadi bukan pelanggaran, tapi Design §6 seharusnya jujur menyebut ini "ARIA scaffolding, bukan compliance".
+PRD US-8 and Design §6 promise a "tree ARIA + keyboard-operable" experience. Reality: `role="tree/treeitem/group"` and `aria-expanded` are present, and the toggle is a real `<button>` (Enter/Space come for free). But the [WAI-ARIA tree pattern](https://www.w3.org/WAI/ARIA/apg/patterns/treeview/) demands more: roving tabindex, `aria-level`, arrow-key navigation. A screen reader will announce a half-finished structure — sometimes more confusing than plain markup. US-8 is P1 ("best effort"), so this isn't a violation, but Design §6 should honestly describe this as "ARIA scaffolding, not compliance."
 
-### T-4 · Semantik `defaultExpandedDepth` saat `data` berubah tidak terdefinisi — **Medium**
+### T-4 · The semantics of `defaultExpandedDepth` when `data` changes are undefined — **Medium**
 
-`useExpansion` menghitung initial state sekali (`useState` initializer). Kalau konsumen uncontrolled mengganti `data` (misal ganti company), tree baru muncul nyaris seluruhnya collapsed — `defaultExpandedDepth` tidak diterapkan ulang. Design §7 hanya membahas "id hilang dibiarkan di Set" dan melewatkan kasus sebaliknya. Tidak ada dokumen yang mendefinisikan perilaku yang benar; kode memilih satu perilaku secara diam-diam. Demo lagi-lagi tidak memperlihatkannya karena pakai controlled mode. **Minimal: dokumentasikan; ideal: remount via `key` atau reset eksplisit.**
+`useExpansion` computes its initial state once (a `useState` initializer). If an uncontrolled consumer swaps out `data` (e.g., switching to a different company), the new tree renders almost entirely collapsed — `defaultExpandedDepth` isn't reapplied. Design §7 only discusses "a missing id is left in the Set" and skips the reverse case. No document defines the correct behavior; the code silently picked one. The demo doesn't surface this either, since it uses controlled mode. **Minimum: document it; ideally: remount via `key` or provide an explicit reset.**
 
-### T-5 · Risiko #1 di PRD (CSS connector) belum dieksekusi mitigasinya — **Medium**
+### T-5 · PRD Risk #1 (CSS connector) has no executed mitigation yet — **Medium**
 
-PRD menyebut connector rusak sebagai risiko terbesar untuk portofolio, dengan mitigasi "test visual manual". Verifikasi di sesi ini hanya sampai compile/unit/build — **belum ada mata yang melihat render-nya**. Dataset demo sudah sengaja mencakup kasus rawan (only-child di `qa-lead→sinta`, `sec-lead→vino`, `tc-log-1`; 1/2/3/4 anak; 5 level), jadi bahan ujinya siap — tinggal `npm run dev` dan lihat. Sampai itu dilakukan, goal G1 berstatus *belum terbukti*.
+The PRD names a broken connector as the single biggest risk for the portfolio, with "manual visual testing" as the mitigation. Verification in this session went only as far as compile/unit/build — **no one has actually looked at the render yet**. The demo dataset deliberately covers the fragile cases (only-child at `qa-lead→sinta`, `sec-lead→vino`, `tc-log-1`; 1/2/3/4 children; 5 levels), so the test material is ready — it just needs `npm run dev` and a look. Until that happens, goal G1 is *unproven*.
 
-### T-6 · NFR performa adalah angka karangan — **Low tapi instruktif**
+### T-6 · The performance NFR is a made-up number — **Low but instructive**
 
-"<100ms initial render, <16ms toggle" tidak pernah diukur dan tidak ada benchmark harness. Angka spesifik yang tidak diukur lebih berbahaya daripada pernyataan kualitatif, karena memberi ilusi presisi. Dua pilihan jujur: ukur (React Profiler + dataset 100 node), atau ubah NFR-1 jadi kualitatif ("tidak ada lag terasa pada ~100 node").
+"<100ms initial render, <16ms toggle" has never been measured and there's no benchmark harness. A specific number that's never been measured is more dangerous than a qualitative statement, because it creates an illusion of precision. Two honest options: measure it (React Profiler + a 100-node dataset), or rewrite NFR-1 as qualitative ("no perceptible lag at ~100 nodes").
 
-### T-7 · Deviasi kecil design↔kode pada cycle-breaking — **Info**
+### T-7 · Minor design↔code deviation on cycle-breaking — **Info**
 
-Design §1 bilang cycle "putus edge **terakhir**"; implementasi memutus edge pada node pertama yang terdeteksi berulang saat walk-up — deterministik dan semua node tetap ter-render (ada test-nya), tapi bukan literal "edge terakhir". Kode juga menambah kebijakan yang tidak ada di design: `parentId === id` (self-cycle) ditangani sebagai kasus khusus. Kode di sini *lebih baik* dari dokumen; dokumen yang harus menyusul.
+Design §1 says a cycle "breaks the **last** edge"; the implementation instead breaks the edge at the first node detected as repeated during the walk-up — deterministic, and every node still renders (there's a test for it), but not literally "the last edge." The code also adds a policy the design never mentions: `parentId === id` (self-cycle) is handled as a special case. The code is *better* here than the document; the document needs to catch up.
 
-### T-8 · CSS library tidak ter-import otomatis — **Info**
+### T-8 · The library's CSS isn't imported automatically — **Info**
 
-`build:lib` menghasilkan `style.css` terpisah; konsumen harus `import 'org-hierarchy-tree/style.css'` sendiri. Konsekuensi wajar dari CSS modules + zero-dependency, tapi belum terdokumentasi di mana pun (README memang di-defer ke v1.1 oleh PRD §7).
+`build:lib` produces a separate `style.css`; consumers have to `import 'org-hierarchy-tree/style.css'` themselves. That's a reasonable consequence of CSS modules + zero dependencies, but it isn't documented anywhere yet (the README was deferred to v1.1 by PRD §7).
 
-## 4. Penilaian Kualitas Keputusan Desain (dengan bukti dari implementasi)
+## 4. Assessment of Design Decision Quality (with evidence from the implementation)
 
-**Keputusan yang terbukti benar.** Pemisahan logic/view (NFR-6) terbukti bukan slogan: seluruh test jalan di environment `node` tanpa jsdom, dan library build 2.3 kB gzip menunjukkan tidak ada yang menumpang. Pilihan flat-array input terbukti saat menulis dummy data — 50 node ditulis tangan tanpa nesting yang menyiksa, dan `dirtyData` untuk demo error-handling jadi trivial. Pilihan HTML+CSS (bukan d3) terbukti dari ukuran bundle dan dari fakta bahwa `renderNode` bisa berisi komponen React apa pun tanpa jembatan foreignObject.
+**Decisions that proved correct.** The logic/view separation (NFR-6) turns out not to be a slogan: every test runs in the `node` environment without jsdom, and the 2.3 kB gzip library build shows nothing is riding along for free. The flat-array input choice paid off while writing dummy data — 50 nodes written by hand without agonizing nesting — and made the `dirtyData` error-handling demo trivial. The HTML+CSS choice (over d3) is validated by the bundle size and by the fact that `renderNode` can hold any React component without a foreignObject bridge.
 
-**Keputusan yang biayanya baru terasa sekarang.** CSS pseudo-element connector memindahkan kompleksitas dari JavaScript ke geometri CSS — dan geometri tidak bisa di-unit-test. Semua confidence untuk FR-4/5/8/9 saat ini bertumpu pada review manual (T-5). Kalau proyek ini serius, langkah berikutnya yang paling bernilai bukan fitur, melainkan *component test* (Testing Library + jsdom) untuk interaksi dan satu *visual snapshot* (Playwright) untuk connector.
+**Decisions whose cost is only showing up now.** The CSS pseudo-element connector moves complexity from JavaScript into CSS geometry — and geometry can't be unit-tested. All confidence in FR-4/5/8/9 currently rests on manual review (T-5). If this project is taken seriously, the highest-value next step isn't a feature — it's a *component test* (Testing Library + jsdom) for interaction, and one *visual snapshot* (Playwright) for the connector.
 
-**Ketiga dokumen saling mengoreksi dengan sehat.** PRD mengunci scope yang design ingin lebarkan (radial ditahan di v2). Design membuat keputusan yang PRD tidak berhak buat (Set berisi yang terbuka, bukan tertutup — konsekuensinya node baru default collapsed, aman untuk org besar). Kode menemukan kasus yang dua dokumen lewatkan (self-parent). Rantai umpan-balik ini bekerja — yang belum bekerja adalah arus baliknya: temuan kode (T-4, T-7) belum ditulis balik ke dokumen.
+**The three documents keep each other honest.** The PRD locks down scope that the design wanted to widen (radial view held back for v2). The design makes a call the PRD had no business making (the Set holds expanded ids, not collapsed ones — meaning new nodes default to collapsed, which is safe for large orgs). The code finds a case both documents missed (self-parent). This feedback chain works — what doesn't work yet is the reverse flow: code-level findings (T-4, T-7) haven't been written back into the documents.
 
-## 5. Kesimpulan & Prioritas Tindak Lanjut
+## 5. Conclusion & Follow-up Priorities
 
-Status jujur v1: **fungsional-inti selesai dan teruji di lapisan data; lapisan interaksi & visual selesai tapi baru terverifikasi oleh compiler, belum oleh test maupun mata manusia.** Dari 6 goal PRD: G3–G6 terpenuhi dengan bukti; G1–G2 menunggu verifikasi visual/performa.
+Honest v1 status: **the core functionality is complete and tested at the data layer; the interaction & visual layer is complete but has only been verified by the compiler, not by tests or human eyes.** Of the PRD's 6 goals: G3–G6 are met with evidence; G1–G2 are waiting on visual/performance verification.
 
-Urutan pengerjaan berikutnya berdasarkan rasio dampak/usaha:
+Next work, ordered by impact/effort ratio:
 
-1. **Jalankan `npm run dev` dan periksa visual** (T-5) — 10 menit, membuka status G1.
-2. **Fix `onDataError` re-fire** (T-2) — bug API nyata, ~5 baris.
-3. **Fix atau hapus field `types`** (T-1) — satu plugin atau satu baris.
-4. Component tests untuk toggle/controlled/renderNode — menutup kolom "untested" di matriks §2.
-5. Tulis balik T-4 & T-7 ke TECHNICAL_DESIGN.md; turunkan klaim §6 a11y sesuai realitas (T-3).
-6. README (sudah dijadwalkan v1.1) — wajib memuat cara import CSS (T-8).
+1. **Run `npm run dev` and check the visuals** (T-5) — 10 minutes, unblocks G1's status.
+2. **Fix the `onDataError` re-fire** (T-2) — a real API bug, ~5 lines.
+3. **Fix or remove the `types` field** (T-1) — one plugin or one line.
+4. Component tests for toggle/controlled/renderNode — close out the "untested" column in the §2 matrix.
+5. Write T-4 & T-7 back into TECHNICAL_DESIGN.md; scale the §6 a11y claims down to match reality (T-3).
+6. README (already scheduled for v1.1) — must cover how to import the CSS (T-8).
 
 ---
 
-## 6. Addendum — Resolusi Temuan (15 Juli 2026, sesi lanjutan)
+## 6. Addendum — Findings Resolution (July 15, 2026, follow-up session)
 
-| Temuan | Resolusi |
+| Finding | Resolution |
 |---|---|
-| T-1 `types` fiktif | ✅ `vite-plugin-dts` — `build:lib` kini menghasilkan `dist-lib/index.d.ts` |
-| T-2 `onDataError` re-fire | ✅ Callback di ref, effect hanya di-trigger `errors` — dengan regression test (callback inline, 2× re-render, 1× terpanggil) |
-| T-3 klaim a11y | ✅ Bukan diturunkan, tapi dipenuhi: roving tabindex, `aria-level/setsize/posinset`, arrow-key navigation lengkap + test |
-| T-4 semantik data-change | ✅ Didefinisikan & diimplementasi: `defaultExpandedDepth` diterapkan ulang; syarat `data` stabil terdokumentasi |
-| T-5 verifikasi visual | ✅ Screenshot headless (Playwright) → `docs/demo*.png` + GIF; connector benar untuk multi-root, only-child, 1–4 anak, 5 level. **Bonus: menemukan bug nyata** — `justify-content:center` pada scroll container membuat sisi kiri chart lebar tidak ter-scroll; sudah di-fix (`.root { width:max-content; margin:0 auto }`). Mitigasi risiko #1 PRD tereksekusi. |
-| T-6 NFR karangan | ✅ `npm run bench`: render 100 node ~20% expanded ≈ 0,5 ms; toggle re-render ≈ 0,5 ms; buildTree 10k ≈ 2,5 ms |
-| T-7 deviasi cycle-breaking | ✅ Design §1 direvisi mengikuti implementasi |
+| T-1 fictitious `types` | ✅ `vite-plugin-dts` — `build:lib` now generates `dist-lib/index.d.ts` |
+| T-2 `onDataError` re-fire | ✅ Callback stored in a ref, effect only triggered by `errors` — with a regression test (inline callback, 2× re-render, called 1×) |
+| T-3 a11y claims | ✅ Not scaled down — fulfilled instead: roving tabindex, `aria-level/setsize/posinset`, full arrow-key navigation + tests |
+| T-4 data-change semantics | ✅ Defined & implemented: `defaultExpandedDepth` is reapplied; the requirement for stable `data` is documented |
+| T-5 visual verification | ✅ Headless screenshots (Playwright) → `docs/demo*.png` + GIF; connector is correct for multi-root, only-child, 1–4 children, 5 levels. **Bonus: found a real bug** — `justify-content:center` on the scroll container made the left side of a wide chart unreachable by scrolling; already fixed (`.root { width:max-content; margin:0 auto }`). PRD Risk #1's mitigation is now executed. |
+| T-6 made-up NFR | ✅ `npm run bench`: rendering 100 nodes ~20% expanded ≈ 0.5 ms; toggle re-render ≈ 0.5 ms; buildTree on 10k ≈ 2.5 ms |
+| T-7 cycle-breaking deviation | ✅ Design §1 revised to match the implementation |
 | T-8 CSS import | ✅ README §quick-start |
 
-Kolom "untested" pada matriks §2 (FR-4/5/6/8/9) kini tertutup oleh 13 component test (jsdom). Fitur baru sesi ini: keyboard nav, `OrgChartHandle`, zoom & pan, `highlightedIds`, `fromNested()`, `ancestorsOf()` — tercatat di PRD §11 (amendment). Sisa yang menunggu: **verifikasi visual manual (T-5 / G1)** dan backlog radial view + npm publish.
+The "untested" column in the §2 matrix (FR-4/5/6/8/9) is now closed out by 13 component tests (jsdom). New features from this session: keyboard nav, `OrgChartHandle`, zoom & pan, `highlightedIds`, `fromNested()`, `ancestorsOf()` — recorded in PRD §11 (amendment). What's still pending: **manual visual verification (T-5 / G1)** and the radial view + npm publish backlog.
 
-## 7. Publish readiness & CI (5 September 2026)
+## 7. Publish readiness & CI (September 5, 2026)
 
-Kerjain enam task dari prompt implementor, semuanya applicable.
+Worked through six tasks from the implementor prompt, all of them applicable.
 
-`node_modules` sempat rusak sebelum mulai apa-apa: `@rollup/rollup-darwin-arm64` hilang, sisa dari proses `vite` yang crash duluan (kelihatan dari tumpukan file `*.timestamp-*.mjs`, sudah masuk `.gitignore`). `npm install` beresin itu dulu.
+`node_modules` was already broken before anything started: `@rollup/rollup-darwin-arm64` was missing, a leftover from an earlier `vite` crash (visible from the pile of `*.timestamp-*.mjs` files, already in `.gitignore`). `npm install` cleared that up first.
 
-| # | Task | Hasil |
+| # | Task | Result |
 |---|---|---|
-| 1 | `LICENSE` + metadata publish | MIT atas nama Nicho Philipo. `package.json` dapat `repository`, `homepage`, `bugs`, `author`, `keywords`, `sideEffects`. |
-| 2 | `'use client'` directive | Ditambah di `OrgChart.tsx`. Rollup nge-strip comment directive pas bundling, jadi dikembalikan lewat `output.banner` di `vite.lib.config.ts` — dicek langsung di hasil `dist-lib/index.js`, bukan cuma di source. |
-| 3 | Test `ZoomPane` (nol jadi enam test) | `src/lib/ZoomPane.test.tsx`: zoom in/out/reset, drag-to-pan, dan regresi `onClickCapture` (drag yang lewat sebuah node nggak boleh mancing `onNodeClick` node itu, klik biasa tetap harus mancing). jsdom belum implementasi Pointer Capture API, jadi di-stub seadanya di `beforeAll`. |
-| 4 | `.github/workflows/ci.yml` | Jalan di setiap push (semua branch) dan tiap PR ke `main` — cuma verifikasi (`tsc`, test, dua build). `deploy-demo.yml` nggak disentuh, tetap satu-satunya yang deploy ke Pages. |
-| 5 | README → link dokumen + `CHANGELOG.md` | Section baru setelah Roadmap. Changelog nyusun ulang v1.0.0 dan v1.1.0 dari `git log` + addendum §6, plus entry Unreleased untuk task 1-5. |
-| 6 (opsional) | Build CJS + `exports` field | `vite.lib.config.ts` sekarang build `['es', 'cjs']`; `package.json` dapat `exports` map (types/import/require), `main` ke `.cjs`, `module` ke `.js`. Dicek `require()` dan `import()` dua-duanya resolve ke 8 export yang sama. |
-| 6 (opsional) | `@vitest/coverage-v8` + `test:coverage` | Pin ke versi vitest yang sama (2.1.9), belum ada threshold — ini baseline dulu, bukan gate. `src/lib` sekitar 97% statements. Laporan default ikut nyangkut `demo/`, `scripts/`, `dist-lib/` yang sebenernya nggak relevan, tapi nggak diutak-atik exclude-nya karena task ini cuma minta angka baseline. |
+| 1 | `LICENSE` + publish metadata | MIT, in Nicho Philipo's name. `package.json` gained `repository`, `homepage`, `bugs`, `author`, `keywords`, `sideEffects`. |
+| 2 | `'use client'` directive | Added to `OrgChart.tsx`. Rollup strips the directive comment during bundling, so it's restored via `output.banner` in `vite.lib.config.ts` — verified directly in the `dist-lib/index.js` output, not just in the source. |
+| 3 | Test `ZoomPane` (zero tests to six) | `src/lib/ZoomPane.test.tsx`: zoom in/out/reset, drag-to-pan, and an `onClickCapture` regression test (a drag that passes over a node must not fire that node's `onNodeClick`, a plain click still must). jsdom doesn't implement the Pointer Capture API yet, so it's stubbed minimally in `beforeAll`. |
+| 4 | `.github/workflows/ci.yml` | Runs on every push (all branches) and every PR into `main` — verification only (`tsc`, tests, two builds). `deploy-demo.yml` was left untouched and remains the only workflow that deploys to Pages. |
+| 5 | README → document links + `CHANGELOG.md` | New section after Roadmap. The changelog reconstructs v1.0.0 and v1.1.0 from `git log` + the §6 addendum, plus an Unreleased entry for tasks 1-5. |
+| 6 (optional) | Build CJS + `exports` field | `vite.lib.config.ts` now builds `['es', 'cjs']`; `package.json` gained an `exports` map (types/import/require), `main` pointing to `.cjs`, `module` to `.js`. Verified that both `require()` and `import()` resolve to the same 8 exports. |
+| 6 (optional) | `@vitest/coverage-v8` + `test:coverage` | Pinned to the same vitest version (2.1.9), no threshold yet — this is a baseline, not a gate. `src/lib` sits around 97% statements. The default report also picks up `demo/`, `scripts/`, `dist-lib/`, which aren't really relevant, but the excludes weren't touched since this task only asked for a baseline number. |
 
-Satu hal yang belum rapi di build CJS: prologue `"use strict"` yang di-inject otomatis sama Rollup nempel langsung setelah banner `'use client';` tanpa baris baru (`"use client";"use strict";...`). Udah dicoba tambahin `\n` di akhir string banner, tapi Rollup nge-trim whitespace itu sebelum masukin prologue-nya sendiri. Nggak ngaruh ke fungsi — `require()` tetap jalan, dan directive yang beneran dibaca Next.js App Router/webpack ada di build ESM (`index.js`), bukan di `.cjs`-nya. Dibiarin gitu aja daripada nambahin plugin custom cuma buat benerin hal kosmetik di task opsional.
+One thing that's still messy in the CJS build: the `"use strict"` prologue that Rollup auto-injects lands right after the `'use client';` banner with no newline (`"use client";"use strict";...`). Tried appending `
+` to the end of the banner string, but Rollup trims that whitespace before inserting its own prologue. Doesn't affect functionality — `require()` still works, and the directive that Next.js App Router/webpack actually reads lives in the ESM build (`index.js`), not the `.cjs`. Left as-is rather than adding a custom plugin just to fix something cosmetic in an optional task.
 
-Tiap task dicek ulang penuh (`npm test`, `tsc --noEmit`, `npm run build`, `npm run build:lib`) sebelum lanjut, dan masing-masing jadi commit sendiri — enam commit, lihat `git log`.
+Each task was fully re-verified (`npm test`, `tsc --noEmit`, `npm run build`, `npm run build:lib`) before moving on, and each became its own commit — six commits, see `git log`.
 
-## 8. Export PNG (5 September 2026)
+## 8. PNG export (September 5, 2026)
 
-| PRD | Design | Kode | Test/Bukti | Status |
+| PRD | Design | Code | Test/Evidence | Status |
 |---|---|---|---|---|
-| FR-12 export PNG (PRD §12, US-12) | Technical Design §7b | `exportImage.ts` (`exportChartToPng`), `OrgChart.tsx` (`useImperativeHandle` → `exportToPng`), `types.ts` (`OrgChartHandle.exportToPng`) | 5 test: 3 unit (`exportImage.test.ts` — target null ditolak, `toPng` dipanggil dengan elemen+opsi benar lalu men-trigger download, error dari `html-to-image` di-propagate) + 2 component (`OrgChart.test.tsx` — export memanggil `html-to-image` dengan elemen `role="tree"` yang benar-benar ter-mount, reject saat `data` kosong) | ✅ |
+| FR-12 PNG export (PRD §12, US-12) | Technical Design §7b | `exportImage.ts` (`exportChartToPng`), `OrgChart.tsx` (`useImperativeHandle` → `exportToPng`), `types.ts` (`OrgChartHandle.exportToPng`) | 5 tests: 3 unit (`exportImage.test.ts` — a null target is rejected, `toPng` is called with the correct element+options and then triggers a download, an error from `html-to-image` is propagated) + 2 component (`OrgChart.test.tsx` — export calls `html-to-image` with the actually-mounted `role="tree"` element, rejects when `data` is empty) | ✅ |
 
-Ukuran `dist-lib` sebelum/sesudah (`npm run build:lib`, gzip):
+`dist-lib` size before/after (`npm run build:lib`, gzip):
 
-| Build | Sebelum | Sesudah |
+| Build | Before | After |
 |---|---|---|
-| ESM (`index.js`, chunk utama) | 4.71 kB | 4.91 kB (+0.20 kB) |
-| ESM (`html-to-image`, chunk terpisah — hanya dimuat saat `exportToPng()` dipanggil) | — | 5.72 kB |
-| CJS (`index.cjs`, chunk utama) | 3.93 kB | 4.12 kB (+0.19 kB) |
-| CJS (`html-to-image`, chunk terpisah) | — | 5.25 kB |
+| ESM (`index.js`, main chunk) | 4.71 kB | 4.91 kB (+0.20 kB) |
+| ESM (`html-to-image`, separate chunk — only loaded when `exportToPng()` is called) | — | 5.72 kB |
+| CJS (`index.cjs`, main chunk) | 3.93 kB | 4.12 kB (+0.19 kB) |
+| CJS (`html-to-image`, separate chunk) | — | 5.25 kB |
 
-Chunk utama naik <0.2 kB gzip (overhead pemanggilan `import()` + wrapper). Biaya `html-to-image` (~5.7 kB gzip) sepenuhnya opt-in via dynamic import — konsumen yang tidak pernah memanggil `exportToPng` tidak mengunduhnya sama sekali, jadi NFR-2 (zero paid-by-default runtime dependency) tidak dilanggar. Verifikasi: `dist-lib/` menghasilkan chunk kedua terpisah untuk kedua format build.
+The main chunk grows by <0.2 kB gzip (overhead from the `import()` call + wrapper). The cost of `html-to-image` (~5.7 kB gzip) is entirely opt-in via dynamic import — consumers who never call `exportToPng` don't download it at all, so NFR-2 (zero paid-by-default runtime dependency) isn't violated. Verification: `dist-lib/` produces a separate second chunk for both build formats.

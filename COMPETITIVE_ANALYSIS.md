@@ -1,67 +1,67 @@
 # Competitive Feature Analysis — org-hierarchy-tree
 
-Sumber (di-scrape via GitHub, September 2026): [bumbeishvili/org-chart](https://github.com/bumbeishvili/org-chart) (1.2k⭐, D3), [ssthouse/tree-chart](https://github.com/ssthouse/tree-chart) (472⭐, D3/canvas), [unicef/react-org-chart](https://github.com/unicef/react-org-chart) (293⭐, D3-SVG), [daniel-hauser/react-organizational-chart](https://github.com/daniel-hauser/react-organizational-chart) (194⭐, JSX), [dabeng/react-orgchart](https://github.com/dabeng/react-orgchart) (150⭐, jQuery-style React port), [artdong/react-org-tree](https://github.com/artdong/react-org-tree) (92⭐), [n1crack/klad](https://github.com/n1crack/klad) (33⭐, canvas+worker, AGPL), [paulosabayomi/treeSpider](https://github.com/paulosabayomi/treeSpider) (21⭐, D3).
+Sources (scraped from GitHub, September 2026): [bumbeishvili/org-chart](https://github.com/bumbeishvili/org-chart) (1.2k⭐, D3), [ssthouse/tree-chart](https://github.com/ssthouse/tree-chart) (472⭐, D3/canvas), [unicef/react-org-chart](https://github.com/unicef/react-org-chart) (293⭐, D3-SVG), [daniel-hauser/react-organizational-chart](https://github.com/daniel-hauser/react-organizational-chart) (194⭐, JSX), [dabeng/react-orgchart](https://github.com/dabeng/react-orgchart) (150⭐, jQuery-style React port), [artdong/react-org-tree](https://github.com/artdong/react-org-tree) (92⭐), [n1crack/klad](https://github.com/n1crack/klad) (33⭐, canvas+worker, AGPL), [paulosabayomi/treeSpider](https://github.com/paulosabayomi/treeSpider) (21⭐, D3).
 
-Legend: ✅ sudah ada di org-hierarchy-tree · 🟡 sebagian ada · ❌ belum ada
+Legend: ✅ already in org-hierarchy-tree · 🟡 partially present · ❌ not yet present
 
-## 1. Layout & Orientasi
-- 🟡 Horizontal vs vertical orientation toggle — ada di bumbeishvili, artdong, ssthouse; kita vertical-only saat ini
-- ❌ Radial / dendrogram / wheel layout — klad, treeSpider (`hSpiderWalk`) — sudah tercatat di TECHNICAL_DESIGN.md §8
-- ❌ Ganti layout dinamis saat runtime — bumbeishvili
-- ❌ Data-driven node sizing (ukuran node bervariasi sesuai data) — bumbeishvili
+## 1. Layout & Orientation
+- 🟡 Horizontal vs vertical orientation toggle — present in bumbeishvili, artdong, ssthouse; we're vertical-only for now
+- ❌ Radial / dendrogram / wheel layout — klad, treeSpider (`hSpiderWalk`) — already noted in TECHNICAL_DESIGN.md §8
+- ❌ Dynamic layout switching at runtime — bumbeishvili
+- ❌ Data-driven node sizing (node size varies with the data) — bumbeishvili
 
-## 2. Interaksi & Editing
-- ✅ Expand/collapse per node, badge jumlah bawahan
+## 2. Interaction & Editing
+- ✅ Per-node expand/collapse, direct-report count badge
 - ✅ expandAll/collapseAll via ref
-- ✅ onNodeClick terpisah dari toggle expand
-- ❌ Drag-and-drop reparenting (pindah node antar parent/sibling) — dabeng, klad, bumbeishvili
-- ❌ Multi-select node — dabeng (`multipleSelect`)
-- ❌ Inline edit (ubah nama/title langsung di kartu) — dabeng
-- ❌ Add/remove node programmatic (API `addNode`/`removeNode`) — bumbeishvili
+- ✅ onNodeClick separate from the expand toggle
+- ❌ Drag-and-drop reparenting (move a node between parents/siblings) — dabeng, klad, bumbeishvili
+- ❌ Multi-select nodes — dabeng (`multipleSelect`)
+- ❌ Inline edit (change name/title directly on the card) — dabeng
+- ❌ Programmatic add/remove node (`addNode`/`removeNode` API) — bumbeishvili
 
-## 3. Navigasi & Search
+## 3. Navigation & Search
 - ✅ Search highlight + auto-expand path (`ancestorsOf`)
-- ✅ Keyboard navigation penuh WAI-ARIA (↑↓→← Home/End Enter/Space) — **ini lebih lengkap dari semua kompetitor**, mayoritas mereka tidak punya keyboard nav sama sekali
-- ❌ Center/focus node on screen (auto-pan ke node tertentu) — bumbeishvili, klad
-- ❌ Fit-to-screen / zoom-extent (reset ke zoom pas semua ke-render) — bumbeishvili, unicef
-- ❌ Go-to-node search dengan animasi kamera — klad
+- ✅ Full WAI-ARIA keyboard navigation (↑↓→← Home/End Enter/Space) — **more complete than every competitor here**, most of them have no keyboard nav at all
+- ❌ Center/focus a node on screen (auto-pan to a given node) — bumbeishvili, klad
+- ❌ Fit-to-screen / zoom-extent (reset zoom so everything renders in view) — bumbeishvili, unicef
+- ❌ Go-to-node search with a camera animation — klad
 
 ## 4. Zoom & Pan
-- ✅ Zoom & pan opsional
-- ❌ Tombol zoom in/out/fit yang bisa dibind ke elemen custom (pola `zoomInId`/`zoomOutId`/`zoomExtentId`) — unicef
+- ✅ Optional zoom & pan
+- ❌ Zoom in/out/fit buttons that can bind to custom elements (the `zoomInId`/`zoomOutId`/`zoomExtentId` pattern) — unicef
 
 ## 5. Export
-- ❌ Export ke PNG — dabeng, unicef, bumbeishvili (semua kompetitor besar punya ini)
-- ❌ Export ke PDF — dabeng, unicef
-- ❌ `getChartState()` / save-restore config (posisi zoom, expand state) — bumbeishvili, unicef (`loadConfig`/`onConfigChange`)
+- ❌ Export to PNG — dabeng, unicef, bumbeishvili (every major competitor has this)
+- ❌ Export to PDF — dabeng, unicef
+- ❌ `getChartState()` / save-restore config (zoom position, expand state) — bumbeishvili, unicef (`loadConfig`/`onConfigChange`)
 
 ## 6. Data & Import
 - ✅ `fromNested()` converter
-- ✅ Validasi data kotor (orphan/cycle/duplicate) dengan structured report via `onDataError` — **fitur unik**, tidak ada kompetitor yang punya selengkap ini (klad cuma broadcast event `warning` untuk orphan, tanpa cycle/duplicate handling)
-- ❌ Import langsung dari CSV — bumbeishvili
-- ❌ Lazy-load children/parent via callback (untuk tree sangat besar, load on-demand dari API) — unicef
+- ✅ Dirty-data validation (orphan/cycle/duplicate) with a structured report via `onDataError` — **a unique feature**, no competitor has anything this thorough (klad only broadcasts a `warning` event for orphans, with no cycle/duplicate handling)
+- ❌ Direct CSV import — bumbeishvili
+- ❌ Lazy-load children/parent via callback (for very large trees, on-demand loading from an API) — unicef
 
-## 7. Tampilan & Tema
+## 7. Appearance & Theming
 - ✅ Theming via CSS custom properties
-- ❌ Preset tema siap pakai (bumbeishvili: Default/Sky/Circles/Oval/Clean/Futuristic) — quick win, tinggal beberapa set CSS variable + dokumentasi
-- ❌ Custom line style per-connector (angle vs curve, warna, lebar, radius) — unicef + daniel-hauser
+- ❌ Ready-made theme presets (bumbeishvili: Default/Sky/Circles/Oval/Clean/Futuristic) — a quick win, just a few CSS variable sets + docs
+- ❌ Per-connector custom line style (angle vs curve, color, width, radius) — unicef + daniel-hauser
 - ❌ Minimap — bumbeishvili, klad
 
-## 8. Performa & Skala
-- ✅ O(n) buildTree, subtree collapsed tidak di-render ke DOM (sudah diukur & dipublish, lihat README §Performa)
-- ❌ Klaim skala node sangat besar (1 juta collapsed / 5.000 expanded — unicef; stress test 20rb node — klad) — kita belum benchmark di skala ini
-- ❌ Canvas/Web Worker rendering untuk tree super besar — klad (arsitektur beda total; DOM-based approach kita kemungkinan tidak akan sekuat ini di >50k node — trade-off yang harus disadari, bukan cuma "belum diimplement")
+## 8. Performance & Scale
+- ✅ O(n) buildTree, collapsed subtrees aren't rendered to the DOM (already measured & published, see README §Performance)
+- ❌ Very-large-scale node claims (1 million collapsed / 5,000 expanded — unicef; 20k-node stress test — klad) — we haven't benchmarked at this scale
+- ❌ Canvas/Web Worker rendering for very large trees — klad (a completely different architecture; our DOM-based approach likely won't hold up as well past >50k nodes — a trade-off to be aware of, not just "not yet implemented")
 
 ## 9. Framework Support
-- 🟡 React-only by design; kompetitor besar (bumbeishvili, ssthouse) multi-framework (Vue/Angular) — ini keputusan strategis, bukan sekadar fitur yang kurang
+- 🟡 React-only by design; the major competitors (bumbeishvili, ssthouse) are multi-framework (Vue/Angular) — this is a strategic decision, not just a missing feature
 
-## Rekomendasi Prioritas (quick win → besar)
+## Priority Recommendations (quick win → large)
 
-1. **Export PNG** — murah (html-to-image/dom-to-image), banyak dipakai kompetitor, perceived value tinggi
-2. **Preset tema CSS** (Default/Dark/Minimal/dst) — tinggal nambah beberapa custom property set + docs
-3. **Horizontal layout toggle** — extend logic CSS connector yang sudah ada
-4. **Fit-to-screen / center-node** — logic zoom/pan sudah ada, tinggal 1 fungsi baru
-5. **Export PDF** — reuse dari export PNG (render ke PDF via jsPDF)
-6. **Drag-and-drop reparenting** — effort besar (perlu validasi cycle real-time + update `parentId`), tapi paling sering diminta secara fungsional
-7. **Radial/dendrogram layout** — sudah di roadmap, effort besar (perlu SVG renderer terpisah, lihat TECHNICAL_DESIGN.md §8)
-8. **Canvas/Web Worker untuk tree super besar** — riset arsitektur besar dulu, jangan buru-buru — hanya relevan kalau target use-case memang butuh >50k node
+1. **PNG export** — cheap (html-to-image/dom-to-image), widely used by competitors, high perceived value
+2. **CSS theme presets** (Default/Dark/Minimal/etc.) — just a few more custom property sets + docs
+3. **Horizontal layout toggle** — extend the existing CSS connector logic
+4. **Fit-to-screen / center-node** — zoom/pan logic already exists, just needs 1 new function
+5. **PDF export** — reuse the PNG export (render into a PDF via jsPDF)
+6. **Drag-and-drop reparenting** — large effort (needs real-time cycle validation + `parentId` updates), but the most frequently requested feature functionally
+7. **Radial/dendrogram layout** — already on the roadmap, large effort (needs a separate SVG renderer, see TECHNICAL_DESIGN.md §8)
+8. **Canvas/Web Worker for very large trees** — research the architecture thoroughly first, don't rush — only relevant if the target use case genuinely needs >50k nodes

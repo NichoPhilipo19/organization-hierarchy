@@ -1,101 +1,107 @@
 # Claude Code Implementation Prompts
 
-Prompt siap-pakai untuk mengeksekusi backlog di [COMPETITIVE_ANALYSIS.md](COMPETITIVE_ANALYSIS.md) §Rekomendasi Prioritas. Satu section = satu prompt = idealnya satu branch/PR/sesi Claude Code terpisah, dikerjakan berurutan (quick win dulu). Copy isi blok kode di tiap section, paste ke Claude Code.
+Ready-to-use prompts for working through the backlog in [COMPETITIVE_ANALYSIS.md](COMPETITIVE_ANALYSIS.md) §Priority Recommendations. One section = one prompt = ideally one separate branch/PR/Claude Code session, worked through in order (quick wins first). Copy the code block's contents from each section and paste it into Claude Code.
 
-Semua prompt sudah menyertakan **Context** (konvensi wajib repo ini) supaya implementor gak perlu ditanya ulang — kalau kamu jalanin beberapa prompt di sesi Claude Code yang sama secara berurutan, bagian Context boleh di-skip setelah prompt pertama.
+Every prompt already includes **Context** (this repo's mandatory conventions) so the implementer doesn't need to ask again — if you run several prompts in the same Claude Code session back to back, you can skip the Context section after the first prompt.
 
 ---
 
-## 0. Context (disertakan di tiap prompt di bawah)
+## 0. Context (included in every prompt below)
 
 ```text
-Kamu kerja di repo org-hierarchy-tree: komponen React reusable buat org chart dari flat
-data ({id, parentId, ...}), TypeScript strict, zero runtime dependency (React cuma
-peerDependency), target ~5kB gzip untuk dist-lib. Baca PRD.md, TECHNICAL_DESIGN.md,
-ANALYSIS.md, README.md dulu sebelum mulai — ikuti konvensi yang sudah ada:
+You're working in the org-hierarchy-tree repo: a reusable React component for org
+charts built from flat data ({id, parentId, ...}), strict TypeScript, zero runtime
+dependencies (React is only a peerDependency), targeting ~5kB gzip for dist-lib.
+Read PRD.md, TECHNICAL_DESIGN.md, ANALYSIS.md, and README.md before starting — follow
+the existing conventions:
 
-- Tambah requirement baru sebagai FR-<n>/NFR-<n> baru di PRD.md (lanjutkan penomoran
-  dari FR terakhir), dengan user story kalau relevan.
-- Kalau ada keputusan desain (misal: kenapa pakai library X, kenapa arsitektur Y),
-  tulis alasannya di TECHNICAL_DESIGN.md — bukan cuma di commit message.
-- WAJIB nulis test (vitest + Testing Library untuk komponen, unit test murni untuk
-  logic). Jangan submit implementasi tanpa test — itu pattern yang sudah ditegur di
-  ANALYSIS.md.
-- Update tabel traceability di ANALYSIS.md (baris baru: FR-baru → design → kode →
-  test/bukti → status).
-- Update CHANGELOG.md di bagian [Unreleased], format Keep a Changelog (Added/Changed/Fixed).
-- Update README.md kalau ada API publik baru (props table, contoh kode, fitur di
-  bagian Fitur).
-- Sebelum selesai jalankan dan pastikan semua pass:
+- Add any new requirement as a new FR-<n>/NFR-<n> in PRD.md (continue numbering from
+  the last FR), with a user story where relevant.
+- If there's a design decision involved (e.g., why library X, why architecture Y),
+  write the reasoning in TECHNICAL_DESIGN.md — not just in the commit message.
+- Tests are MANDATORY (vitest + Testing Library for components, pure unit tests for
+  logic). Never submit an implementation without tests — that's the exact pattern
+  called out in ANALYSIS.md.
+- Update the traceability table in ANALYSIS.md (a new row: new-FR → design → code →
+  test/evidence → status).
+- Update CHANGELOG.md under [Unreleased], following the Keep a Changelog format
+  (Added/Changed/Fixed).
+- Update README.md if there's a new public API (props table, code example, feature
+  listed under Features).
+- Before finishing, run these and make sure everything passes:
   npm run build   (tsc --noEmit + vite build)
   npm test        (vitest run)
   npm run build:lib
-  Bandingkan ukuran dist-lib gzip sebelum/sesudah — laporkan angkanya, jangan biarkan
-  nambah signifikan diam-diam (lihat README §Performa untuk baseline).
-- Jangan tambah runtime dependency baru tanpa dynamic import/opt-in, kecuali sudah
-  didiskusikan trade-off-nya secara eksplisit di TECHNICAL_DESIGN.md — prinsip zero-dep
-  ini adalah nilai jual utama proyek (NFR-2), jangan dilanggar diam-diam.
-- Jangan regresi fitur yang sudah ada dan jadi diferensiator kita: validasi data kotor
-  (onDataError), keyboard navigation WAI-ARIA penuh (roving tabindex, arrow keys,
-  aria-level/setsize/posinset). Kalau fitur baru berpotensi bentrok (misal drag-and-drop
-  vs keyboard nav), desain supaya keduanya tetap jalan — a11y bukan opsional di sini.
+  Compare the dist-lib gzip size before/after — report the numbers, don't let it grow
+  significantly without saying so (see README §Performance for the baseline).
+- Don't add a new runtime dependency without a dynamic import/opt-in, unless its
+  trade-offs have already been discussed explicitly in TECHNICAL_DESIGN.md — the
+  zero-dep principle is the project's core selling point (NFR-2); don't violate it
+  silently.
+- Don't regress existing features that are our differentiators: dirty-data validation
+  (onDataError), full WAI-ARIA keyboard navigation (roving tabindex, arrow keys,
+  aria-level/setsize/posinset). If a new feature might conflict with these (e.g.,
+  drag-and-drop vs. keyboard nav), design it so both keep working — accessibility is
+  not optional here.
 ```
 
 ---
 
-## 1. Export PNG (quick win)
+## 1. PNG export (quick win)
 
 ```text
-[sertakan blok Context di atas]
+[include the Context block above]
 
-Task: tambah kemampuan export chart yang sedang dirender jadi file PNG.
+Task: add the ability to export the currently rendered chart as a PNG file.
 
 Requirements:
-- API: method baru di OrgChartHandle (ref), misal `exportToPng(filename?: string):
-  Promise<void>`, jadi konsumen bisa panggil dari tombol mereka sendiri
+- API: a new method on OrgChartHandle (ref), e.g. `exportToPng(filename?: string):
+  Promise<void>`, so consumers can call it from their own button
   (`ref.current.exportToPng('org-chart.png')`).
-- Implementasi pakai library rendering DOM→image yang ringan (misal html-to-image
-  atau dom-to-image-more) — install sebagai dependency biasa tapi import-nya dynamic
-  (`await import(...)`) di dalam fungsi export, supaya konsumen yang gak pernah manggil
-  export tidak kena cost bundle sama sekali.
-- Harus tetap benar untuk subtree yang collapsed (cuma capture apa yang sedang
-  ke-render/visible, bukan seluruh data) dan untuk state zoom/pan saat ini (atau,
-  kalau lebih masuk akal, opsi `{ fitContent: boolean }` untuk auto zoom-to-fit dulu
-  sebelum capture — putuskan salah satu dan dokumentasikan kenapa di TECHNICAL_DESIGN.md).
-- Tambah tombol export di demo (src/demo atau App.tsx yang jadi live demo) supaya
-  kelihatan di https://nichophilipo19.github.io/organization-hierarchy/.
-- Test: mock library export-nya, verifikasi method dipanggil dengan container element
-  yang benar dan promise resolve/reject sesuai skenario error (misal container belum
-  ter-mount).
-- FR baru: "Export chart yang sedang dirender ke file PNG" — catat di PRD.md dan
-  ANALYSIS.md.
+- Implement using a lightweight DOM→image rendering library (e.g. html-to-image
+  or dom-to-image-more) — install it as a regular dependency but import it dynamically
+  (`await import(...)`) inside the export function, so consumers who never call export
+  pay zero bundle cost.
+- Must remain correct for collapsed subtrees (capture only what's currently
+  rendered/visible, not the entire data set) and for the current zoom/pan state (or,
+  if it makes more sense, a `{ fitContent: boolean }` option to auto zoom-to-fit
+  before capturing — pick one and document why in TECHNICAL_DESIGN.md).
+- Add an export button to the demo (src/demo or the App.tsx that serves as the live
+  demo) so it's visible at https://nichophilipo19.github.io/organization-hierarchy/.
+- Tests: mock the export library, verify the method is called with the correct
+  container element and that the promise resolves/rejects correctly for error
+  scenarios (e.g. the container isn't mounted yet).
+- New FR: "Export the currently rendered chart to a PNG file" — record it in PRD.md
+  and ANALYSIS.md.
 ```
 
 ---
 
-## 2. Preset tema CSS
+## 2. CSS theme presets
 
 ```text
-[sertakan blok Context di atas]
+[include the Context block above]
 
-Task: sediakan beberapa preset tema siap pakai di atas mekanisme CSS custom
-properties yang sudah ada (--orgchart-card-bg, --orgchart-line-color,
+Task: provide a handful of ready-made theme presets on top of the existing CSS
+custom property mechanism (--orgchart-card-bg, --orgchart-line-color,
 --orgchart-highlight-color, --orgchart-focus-color).
 
 Requirements:
-- Buat minimal 3 preset (misal: `default`, `dark`, `minimal`) sebagai CSS class atau
-  `data-theme` attribute value, masing-masing set ulang custom properties yang sudah
-  ada — TANPA menambah custom property baru kalau tidak perlu, supaya tetap backward
-  compatible dengan konsumen yang sudah pakai theming manual.
-- Ekspor sebagai file CSS terpisah (misal `style.css` tetap base, tambah
-  `themes.css` atau digabung dengan selector `[data-orgchart-theme="dark"]`) — putuskan
-  struktur file dan jelaskan alasannya di TECHNICAL_DESIGN.md (§Theming).
-- Update demo untuk punya switcher tema (dropdown/button) supaya kelihatan di live demo.
-- Test: snapshot atau assertion bahwa computed style / class berubah sesuai prop/attribute
-  tema yang dipilih.
-- Update README §Theming dengan daftar preset dan cara pakai (via className atau prop
-  `theme` di <OrgChart>).
-- FR baru di PRD.md + baris di ANALYSIS.md.
+- Create at least 3 presets (e.g. `default`, `dark`, `minimal`) as a CSS class or
+  `data-theme` attribute value, each resetting the existing custom properties —
+  WITHOUT adding new custom properties unless necessary, to stay backward
+  compatible with consumers already doing manual theming.
+- Export as a separate CSS file (e.g. keep `style.css` as the base, add
+  `themes.css`, or combine it using a `[data-orgchart-theme="dark"]` selector) —
+  decide on the file structure and explain the reasoning in TECHNICAL_DESIGN.md
+  (§Theming).
+- Update the demo to have a theme switcher (dropdown/button) so it's visible in the
+  live demo.
+- Tests: a snapshot or assertion that computed style / class changes according to the
+  selected theme prop/attribute.
+- Update README §Theming with the list of presets and how to use them (via className
+  or a `theme` prop on <OrgChart>).
+- New FR in PRD.md + a row in ANALYSIS.md.
 ```
 
 ---
@@ -103,28 +109,29 @@ Requirements:
 ## 3. Horizontal layout toggle
 
 ```text
-[sertakan blok Context di atas]
+[include the Context block above]
 
-Task: tambah prop `orientation?: 'vertical' | 'horizontal'` (default `'vertical'`,
-biar backward compatible).
+Task: add an `orientation?: 'vertical' | 'horizontal'` prop (default `'vertical'`,
+to stay backward compatible).
 
 Requirements:
-- Vertical = perilaku sekarang (root di atas, anak di bawah). Horizontal = root di
-  kiri, anak ke kanan (atau sebaliknya — putuskan konvensi umum dan sebutkan alasan
-  di TECHNICAL_DESIGN.md, cek juga bagaimana kompetitor artdong/react-org-tree dan
-  ssthouse/tree-chart mendefinisikan "horizontal" biar konsisten dengan ekspektasi
-  pasar).
-- CSS connector (yang sekarang dijelaskan di TECHNICAL_DESIGN.md kenapa CSS bukan SVG)
-  harus di-adapt untuk arah horizontal — connector garis berubah dari vertical-branch
-  jadi horizontal-branch.
-- Keyboard navigation WAI-ARIA (arrow keys) TIDAK berubah semantiknya mengikuti DOM
-  order (atas/bawah tetap next/prev sibling secara logical, kiri/kanan tetap
-  expand/collapse) — jangan bikin bingung user screen reader dengan mengubah makna
-  arrow key ikut orientasi visual. Dokumentasikan keputusan ini eksplisit karena ini
-  poin yang sering salah diimplementasi kompetitor.
-- Test: render snapshot horizontal vs vertical, pastikan keyboard nav test yang sudah
-  ada tetap pass di kedua orientasi (parametrize test existing kalau perlu).
-- FR baru di PRD.md + baris di ANALYSIS.md + update README props table.
+- Vertical = current behavior (root on top, children below). Horizontal = root on
+  the left, children to the right (or the reverse — decide on the common convention
+  and state the reasoning in TECHNICAL_DESIGN.md; also check how competitors
+  artdong/react-org-tree and ssthouse/tree-chart define "horizontal" so we stay
+  consistent with market expectations).
+- The CSS connector (whose reasoning for CSS-over-SVG is already explained in
+  TECHNICAL_DESIGN.md) needs to be adapted for the horizontal direction — the
+  connector lines change from a vertical-branch to a horizontal-branch pattern.
+- WAI-ARIA keyboard navigation (arrow keys) does NOT change semantics based on
+  visual orientation — it follows DOM order (up/down stays next/prev sibling
+  logically, left/right stays expand/collapse). Don't confuse screen reader users
+  by having arrow-key meaning follow the visual orientation. Document this decision
+  explicitly, since it's a point competitors frequently get wrong.
+- Tests: render snapshots for horizontal vs vertical, make sure the existing keyboard
+  nav tests still pass in both orientations (parametrize the existing tests if
+  needed).
+- New FR in PRD.md + a row in ANALYSIS.md + update the README props table.
 ```
 
 ---
@@ -132,50 +139,52 @@ Requirements:
 ## 4. Fit-to-screen / center-node
 
 ```text
-[sertakan blok Context di atas]
+[include the Context block above]
 
-Task: extend ZoomPane + OrgChartHandle dengan dua method baru:
-- `fitToScreen(): void` — hitung bounding box seluruh node yang sedang ter-render
-  (visible, bukan collapsed), lalu set scale & translate ZoomPane supaya semuanya
-  pas di viewport dengan padding wajar.
-- `centerNode(id: string): void` — pan (tanpa ubah scale, atau optional param buat
-  scale juga) supaya node dengan id tersebut berada di tengah viewport. Berguna
-  dipasangkan dengan search: setelah user pilih salah satu hasil search, auto center
-  ke node itu.
+Task: extend ZoomPane + OrgChartHandle with two new methods:
+- `fitToScreen(): void` — compute the bounding box of every currently rendered
+  (visible, not collapsed) node, then set ZoomPane's scale & translate so everything
+  fits the viewport with reasonable padding.
+- `centerNode(id: string): void` — pan (without changing scale, or with an optional
+  param to also change scale) so the node with that id ends up centered in the
+  viewport. Useful paired with search: after a user picks a search result, auto-center
+  on that node.
 
 Requirements:
-- Reuse logic zoom/pan yang sudah ada di ZoomPane, jangan bikin sistem transform
-  paralel.
-- Harus tetap benar kalau chart di-render dalam keadaan sebagian collapsed (bounding
-  box cuma dari node visible).
-- Test: assert transform/scale/translate state berubah sesuai ekspektasi untuk kedua
-  method, termasuk edge case node id tidak ditemukan (`centerNode` harus no-op atau
-  throw — putuskan dan dokumentasikan).
-- Demo: tombol "Fit to screen" + contoh search yang auto-center ke hasil pertama.
-- FR baru di PRD.md + baris di ANALYSIS.md.
+- Reuse the existing zoom/pan logic in ZoomPane — don't build a parallel transform
+  system.
+- Must remain correct when the chart is partially collapsed (the bounding box should
+  only come from visible nodes).
+- Tests: assert that transform/scale/translate state changes as expected for both
+  methods, including the edge case where the node id isn't found (`centerNode` should
+  either no-op or throw — decide and document which).
+- Demo: a "Fit to screen" button + a search example that auto-centers on the first
+  result.
+- New FR in PRD.md + a row in ANALYSIS.md.
 ```
 
 ---
 
-## 5. Export PDF
+## 5. PDF export
 
 ```text
-[sertakan blok Context di atas]
+[include the Context block above]
 
-Task: tambah `exportToPdf(filename?: string): Promise<void>` di OrgChartHandle,
-dibangun di atas hasil kerja #1 (Export PNG) — reuse capture DOM→image, lalu embed
-image itu ke PDF (misal pakai jsPDF, dynamic import juga).
+Task: add `exportToPdf(filename?: string): Promise<void>` to OrgChartHandle, built
+on top of #1's work (PNG export) — reuse the DOM→image capture, then embed that image
+into a PDF (e.g. using jsPDF, also via dynamic import).
 
 Requirements:
-- Jangan duplikasi logic capture — refactor #1 supaya ada fungsi internal
-  `captureAsImage()` yang dipakai baik oleh exportToPng maupun exportToPdf.
-- Handle ukuran halaman PDF wajar (fit ke ukuran chart, atau opsi `{ pageSize: 'a4' |
-  'fit' }` — putuskan default dan dokumentasikan).
-- Test: mock jsPDF, verifikasi image di-attach dan save dipanggil dengan filename yang benar.
-- Update README §Export dengan kedua method (PNG & PDF) sekaligus.
-- FR baru di PRD.md + baris di ANALYSIS.md (boleh gabung satu FR "Export ke PNG/PDF"
-  dengan dua acceptance criteria, atau dua FR terpisah — konsisten dengan gaya FR yang
-  sudah ada di file).
+- Don't duplicate the capture logic — refactor #1 so there's an internal
+  `captureAsImage()` function used by both exportToPng and exportToPdf.
+- Handle a reasonable PDF page size (fit to the chart's size, or a
+  `{ pageSize: 'a4' | 'fit' }` option — decide on a default and document it).
+- Tests: mock jsPDF, verify the image is attached and save is called with the correct
+  filename.
+- Update README §Export covering both methods (PNG & PDF) together.
+- New FR in PRD.md + a row in ANALYSIS.md (either combine into one FR "Export to
+  PNG/PDF" with two acceptance criteria, or two separate FRs — whichever is
+  consistent with the existing FR style in the file).
 ```
 
 ---
@@ -183,37 +192,39 @@ Requirements:
 ## 6. Drag-and-drop reparenting
 
 ```text
-[sertakan blok Context di atas]
+[include the Context block above]
 
-Task: fitur paling besar & paling sering diminta di kompetitor (dabeng, klad,
-bumbeishvili) — izinkan user memindahkan node ke parent lain via drag-and-drop.
+Task: the biggest and most frequently requested feature among competitors (dabeng,
+klad, bumbeishvili) — let users move a node to a different parent via drag-and-drop.
 
-PENTING — desain sebelum coding, tulis dulu di TECHNICAL_DESIGN.md:
-- Library ini TIDAK memegang state data (data selalu datang dari prop `data` milik
-  konsumen) — jadi drag-drop TIDAK boleh mutate data secara internal. Desain sebagai
-  callback: `onReparent?: (nodeId: string, newParentId: string | null) => void`,
-  konsumen yang bertanggung jawab update `data` mereka sendiri dan re-render.
-- WAJIB validasi cycle SEBELUM memanggil onReparent (reuse logic deteksi cycle yang
-  sudah ada di buildTree/validation, jangan tulis ulang) — kalau drop target adalah
-  descendant dari node yang di-drag, tolak drop (visual feedback: cursor
-  not-allowed/drop indicator merah).
-- WAJIB ada alternatif keyboard untuk operasi yang sama (drag-drop mouse-only
-  melanggar NFR-4/keyboard-accessibility yang sudah jadi diferensiator kita — lihat
-  bagaimana klad menangani ini dengan mode 'm' untuk activate drag mode via keyboard,
-  bisa dicontoh polanya tapi disesuaikan skema keyboard nav yang sudah ada di sini).
-- Prop opt-in: `draggable?: boolean` (default false) — jangan ubah perilaku default
-  existing user.
+IMPORTANT — design before coding; write this up first in TECHNICAL_DESIGN.md:
+- This library does NOT own the data state (data always comes from the consumer's
+  `data` prop) — so drag-drop must NOT mutate data internally. Design it as a
+  callback: `onReparent?: (nodeId: string, newParentId: string | null) => void`;
+  the consumer is responsible for updating their own `data` and re-rendering.
+- Cycle validation is MANDATORY BEFORE calling onReparent (reuse the cycle-detection
+  logic that already exists in buildTree/validation — don't rewrite it) — if the drop
+  target is a descendant of the node being dragged, reject the drop (visual feedback:
+  a not-allowed cursor / red drop indicator).
+- A keyboard alternative for the same operation is MANDATORY (mouse-only drag-drop
+  would violate NFR-4/keyboard-accessibility, which is already one of our
+  differentiators — see how klad handles this with an 'm' mode to activate drag mode
+  via keyboard; the pattern can be borrowed but adapted to the keyboard nav scheme
+  already in place here).
+- Opt-in prop: `draggable?: boolean` (default false) — don't change the default
+  behavior for existing users.
 
 Requirements:
-- Implementasi drag pakai pointer events (bukan HTML5 native drag-and-drop, supaya
-  konsisten cross-device termasuk touch).
-- Visual: indikator saat hover di atas target parent yang valid (garis/highlight),
-  dan indikator ditolak saat target invalid (cycle atau target = node itu sendiri).
-- Test: ekstensif — drop ke parent valid (callback terpanggil dengan argumen benar),
-  drop yang bikin cycle (callback TIDAK terpanggil), drop ke diri sendiri, keyboard
-  alternative path end-to-end.
-- FR baru + amendment di PRD.md (fitur besar, kemungkinan perlu masuk sebagai
-  amendment section seperti §11 yang sudah ada), baris lengkap di ANALYSIS.md.
+- Implement dragging with pointer events (not native HTML5 drag-and-drop, to stay
+  consistent across devices, touch included).
+- Visual: an indicator when hovering over a valid drop-target parent (line/highlight),
+  and a rejection indicator when the target is invalid (a cycle, or the target is the
+  node itself).
+- Tests: extensive — drop onto a valid parent (callback called with the correct
+  arguments), a drop that would create a cycle (callback NOT called), dropping onto
+  itself, the keyboard alternative path end-to-end.
+- New FR + an amendment in PRD.md (this is a large feature, likely needs to go in as
+  an amendment section like the existing §11), a complete row in ANALYSIS.md.
 ```
 
 ---
@@ -221,53 +232,55 @@ Requirements:
 ## 7. Radial / dendrogram layout
 
 ```text
-[sertakan blok Context di atas]
+[include the Context block above]
 
-Task: ini item roadmap yang sudah disebut di TECHNICAL_DESIGN.md §8 (radial view,
-SVG renderer, shared hooks) — sekarang waktunya spec & implement MVP.
+Task: this is the roadmap item already mentioned in TECHNICAL_DESIGN.md §8 (radial
+view, SVG renderer, shared hooks) — time to spec and implement an MVP.
 
 Requirements:
-- Baca dulu TECHNICAL_DESIGN.md §8, tulis addendum yang merinci desain final sebelum
-  coding (renderer terpisah, tapi reuse buildTree/useExpansion — jangan duplikasi
-  logic data).
-- Scope MVP secara eksplisit dan TULIS scope-nya di PRD.md sebagai Non-Goals kalau
-  ada yang sengaja ditunda (contoh umum: MVP radial mungkin belum support zoom/pan
-  atau keyboard nav paritas penuh dengan tree view — kalau begitu, sebutkan itu
-  terang-terangan sebagai beta/experimental, JANGAN diam-diam kurang lengkap seperti
-  temuan T-3 soal klaim a11y yang berlebihan di ANALYSIS.md).
-- Prop: `layout?: 'tree' | 'radial'` di <OrgChart>.
-- Test: minimal snapshot render + test data-logic yang dipakai bersama (pastikan
-  test buildTree/useExpansion yang sudah ada tidak perlu berubah — itu tandanya
-  reuse-nya benar).
-- Update README (fitur baru + screenshot/GIF radial, generate via `npm run visuals`).
-- FR baru di PRD.md + baris di ANALYSIS.md, tandai statusnya jujur (🟡 kalau memang
-  cuma MVP/beta).
+- Read TECHNICAL_DESIGN.md §8 first, then write an addendum detailing the final
+  design before coding (a separate renderer, but reusing buildTree/useExpansion —
+  don't duplicate the data logic).
+- Scope the MVP explicitly and WRITE that scope into PRD.md as Non-Goals for anything
+  deliberately deferred (common example: the radial MVP might not support zoom/pan or
+  full keyboard-nav parity with the tree view — if so, state that outright as
+  beta/experimental, do NOT let it be silently incomplete the way T-3 in ANALYSIS.md
+  called out for overstated a11y claims).
+- Prop: `layout?: 'tree' | 'radial'` on <OrgChart>.
+- Tests: at minimum a snapshot render + tests for the shared data logic (make sure
+  the existing buildTree/useExpansion tests don't need to change — that's the signal
+  that the reuse is done correctly).
+- Update the README (new feature + a radial screenshot/GIF, generated via
+  `npm run visuals`).
+- New FR in PRD.md + a row in ANALYSIS.md, honestly flagging its status (🟡 if it's
+  genuinely just an MVP/beta).
 ```
 
 ---
 
-## 8. Riset skala besar (Canvas/Web Worker) — SPIKE, bukan implementasi
+## 8. Large-scale research (Canvas/Web Worker) — SPIKE, not implementation
 
 ```text
-[sertakan blok Context di atas]
+[include the Context block above]
 
-Task: ini PROMPT RISET, bukan prompt implementasi — jangan langsung nulis
-Canvas/WebWorker renderer.
+Task: this is a RESEARCH PROMPT, not an implementation prompt — don't jump straight
+into writing a Canvas/WebWorker renderer.
 
 Requirements:
-- Jalankan `npm run bench` dengan dataset sintetis yang jauh lebih besar dari yang
-  ada sekarang (10.000 / 50.000 / 100.000 node), pakai pendekatan DOM yang sudah ada
-  saat ini (jangan ubah arsitektur dulu).
-- Ukur: waktu buildTree, waktu initial render dengan berbagai persentase expanded,
-  waktu re-render setelah 1 toggle, dan (kalau bisa) memory footprint kasar.
-- Bandingkan angka itu dengan klaim kompetitor di COMPETITIVE_ANALYSIS.md (unicef:
-  1 juta collapsed/5.000 expanded; klad: 20.000 stress test) — tulis kesimpulan:
-  di titik berapa node pendekatan DOM kita mulai terasa lambat (target NFR-1: render
-  <100ms, toggle <16ms)?
-- Tulis hasilnya sebagai addendum baru di ANALYSIS.md (bukan PR kode) dengan
-  rekomendasi go/no-go: apakah rewrite ke canvas/Web Worker worth effort-nya untuk
-  target use-case proyek ini (portofolio component, bukan enterprise HRIS jutaan
-  karyawan), atau cukup didokumentasikan sebagai known limitation di README.
-- JANGAN implement rewrite di prompt/sesi ini — itu keputusan besar yang butuh
-  persetujuan eksplisit setelah data riset ini ada.
+- Run `npm run bench` with synthetic datasets much larger than what exists today
+  (10,000 / 50,000 / 100,000 nodes), using the current DOM-based approach as-is
+  (don't change the architecture yet).
+- Measure: buildTree time, initial render time at various expanded percentages,
+  re-render time after a single toggle, and (if feasible) a rough memory footprint.
+- Compare those numbers against the competitor claims in COMPETITIVE_ANALYSIS.md
+  (unicef: 1 million collapsed/5,000 expanded; klad: 20,000-node stress test) — write
+  a conclusion: at what node count does our DOM approach start feeling slow (against
+  the NFR-1 target: render <100ms, toggle <16ms)?
+- Write the results up as a new addendum in ANALYSIS.md (not a code PR), with a
+  go/no-go recommendation: is a rewrite to canvas/Web Worker worth the effort for
+  this project's target use case (a portfolio component, not an enterprise HRIS with
+  millions of employees), or is it enough to document as a known limitation in the
+  README.
+- Do NOT implement the rewrite in this prompt/session — that's a major decision that
+  needs explicit sign-off once this research data exists.
 ```

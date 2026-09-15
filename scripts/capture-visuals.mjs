@@ -1,7 +1,7 @@
 /**
- * Ambil visual untuk README: docs/demo.png (hero), docs/demo-dirty.png,
- * dan frame GIF interaksi → docs/frames/*.png (dirakit jadi GIF via ffmpeg).
- * Jalankan: `vite build --base=./` dulu, lalu `node scripts/capture-visuals.mjs`.
+ * Capture visuals for the README: docs/demo.png (hero), docs/demo-dirty.png,
+ * and interaction GIF frames → docs/frames/*.png (assembled into a GIF via ffmpeg).
+ * Run `vite build --base=./` first, then `node scripts/capture-visuals.mjs`.
  */
 
 import { mkdirSync, readFileSync } from 'node:fs';
@@ -13,7 +13,7 @@ const root = resolve(import.meta.dirname, '..');
 mkdirSync(resolve(root, 'docs/frames'), { recursive: true });
 const out = (f) => resolve(root, 'docs', f);
 
-// Static server mini — ES modules tidak jalan via file://
+// Tiny static server — ES modules don't work via file://
 const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css' };
 const server = createServer((req, res) => {
   const path = req.url === '/' ? '/index.html' : req.url.split('?')[0];
@@ -51,7 +51,7 @@ const browser = await chromium.launch();
   await page.close();
 }
 
-// ---- Frame GIF interaksi ----
+// ---- Interaction GIF frames ----
 {
   const page = await browser.newPage({
     viewport: { width: 1100, height: 660 },
@@ -69,8 +69,8 @@ const browser = await chromium.launch();
   };
 
   await snap(2); // initial: depth 2
-  // expand salah satu cabang via toggle badge (klik programatik — chart lebar,
-  // elemen bisa di luar viewport)
+  // expand one branch via the toggle badge (programmatic click — the chart is wide,
+  // the element may be outside the viewport)
   const clickToggle = () =>
     page
       .locator('button[aria-label^="Expand"]')
@@ -83,14 +83,14 @@ const browser = await chromium.launch();
   // expand all
   await page.getByRole('button', { name: /^expand all$/i }).click();
   await snap(2);
-  // search + highlight — scroll ke hasil pertama supaya ring terlihat
+  // search + highlight — scroll to the first hit so the ring is visible
   await page.getByPlaceholder(/cari nama/i).fill('lead');
   await page
     .locator('[aria-selected="true"]')
     .first()
     .evaluate((el) => {
-      // scroll manual container chart (overflow:auto) supaya node ter-highlight
-      // ada di tengah, tanpa menggulung control bar keluar layar
+      // manually scroll the chart's overflow:auto container so the highlighted node
+      // ends up centered, without scrolling the control bar out of view
       let c = el.parentElement;
       while (
         c &&
@@ -112,10 +112,10 @@ const browser = await chromium.launch();
   await page.getByRole('button', { name: 'Zoom out' }).click();
   await page.getByRole('button', { name: 'Zoom out' }).click();
   await snap(2);
-  // pan drag — pakai titik tengah viewport (chart bisa lebih lebar dari layar)
+  // pan drag — use the viewport's center point (the chart can be wider than the screen)
   const size = page.viewportSize();
   const cx = size.width / 2;
-  const cy = size.height / 2 + 100; // di area chart, bukan control bar
+  const cy = size.height / 2 + 100; // in the chart area, not the control bar
   await page.mouse.move(cx, cy);
   await page.mouse.down();
   await page.mouse.move(cx + 140, cy + 60, { steps: 8 });

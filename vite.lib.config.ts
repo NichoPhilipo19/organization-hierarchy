@@ -7,7 +7,7 @@ import dts from 'vite-plugin-dts';
 export default defineConfig({
   plugins: [
     react(),
-    // T-1: hasilkan .d.ts sesuai field `types` di package.json
+    // T-1: generate .d.ts matching the `types` field in package.json
     dts({
       include: ['src/lib'],
       entryRoot: 'src/lib',
@@ -20,14 +20,14 @@ export default defineConfig({
       entry: resolve(__dirname, 'src/lib/index.ts'),
       name: 'OrgHierarchyTree',
       formats: ['es', 'cjs'],
-      // es -> index.js, cjs -> index.cjs (dual package, lihat package.json "exports")
+      // es -> index.js, cjs -> index.cjs (dual package, see package.json "exports")
       fileName: (format) => (format === 'es' ? 'index.js' : 'index.cjs'),
     },
     rollupOptions: {
       external: ['react', 'react-dom', 'react/jsx-runtime'],
       output: {
-        // Rollup strip 'use client' saat bundling — kembalikan lewat banner
-        // supaya Next.js App Router tetap mengenali OrgChart sebagai Client Component.
+        // Rollup strips 'use client' during bundling — restored via the banner
+        // so Next.js App Router still recognizes OrgChart as a Client Component.
         banner: "'use client';\n",
       },
     },

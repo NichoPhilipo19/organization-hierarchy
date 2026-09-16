@@ -26,6 +26,12 @@ const getCanvas = (container: HTMLElement) =>
 const getViewport = (container: HTMLElement) =>
   container.querySelector<HTMLElement>('[class*="zoomViewport"]')!;
 
+const parseTransform = (transform: string) => {
+  const m = transform.match(/translate\(([-\d.]+)px, ([-\d.]+)px\) scale\(([-\d.]+)\)/);
+  if (!m) throw new Error(`unexpected transform string: ${transform}`);
+  return { x: Number(m[1]), y: Number(m[2]), k: Number(m[3]) };
+};
+
 describe('ZoomPane — controls (zoomable prop)', () => {
   it('renders Zoom in / Zoom out / Reset zoom only when zoomable=true', () => {
     const { rerender } = render(<OrgChart data={data} zoomable />);
@@ -58,6 +64,55 @@ describe('ZoomPane — controls (zoomable prop)', () => {
 
     await user.click(screen.getByRole('button', { name: 'Reset zoom' }));
     expect(canvas.style.transform).toBe('translate(0px, 0px) scale(1)');
+  });
+});
+
+describe('ZoomPane — wheel to zoom', () => {
+  it('keeps the point under the cursor fixed (zoom-to-cursor invariant)', () => {
+    const { container } = render(<OrgChart data={data} zoomable />);
+    const viewport = getViewport(container);
+    const canvas = getCanvas(container);
+    const rect = viewport.getBoundingClientRect();
+    const clientX = 120;
+    const clientY = 80;
+
+    const before = parseTransform(canvas.style.transform);
+    fireEvent.wheel(viewport, { deltaY: -200, clientX, clientY });
+    const after = parseTransform(canvas.style.transform);
+
+    // It actually zoomed — otherwise the invariant check below would be vacuous.
+    expect(after.k).not.toBe(before.k);
+
+    const px = clientX - rect.left;
+    const py = clientY - rect.top;
+    // The canvas-space point under the cursor must map to the same place
+    // before and after — that's the whole point of zoom-to-cursor (see the
+    // comment in ZoomPane.tsx's wheel handler).
+    expect((px - after.x) / after.k).toBeCloseTo((px - before.x) / before.k, 5);
+    expect((py - after.y) / after.k).toBeCloseTo((py - before.y) / before.k, 5);
+  });
+
+  it('scrolling down (positive deltaY) zooms out', () => {
+    const { container } = render(<OrgChart data={data} zoomable />);
+    const viewport = getViewport(container);
+    const canvas = getCanvas(container);
+
+    fireEvent.wheel(viewport, { deltaY: 200, clientX: 0, clientY: 0 });
+    expect(parseTransform(canvas.style.transform).k).toBeLessThan(1);
+  });
+
+  it('respects the same min/max clamp as the +/- buttons', () => {
+    const { container } = render(<OrgChart data={data} zoomable />);
+    const viewport = getViewport(container);
+    const canvas = getCanvas(container);
+
+    // MIN_SCALE/MAX_SCALE in ZoomPane.tsx are 0.25 / 2.5 — not exported, so
+    // this test pins the observable behavior rather than importing them.
+    fireEvent.wheel(viewport, { deltaY: -1_000_000, clientX: 0, clientY: 0 });
+    expect(parseTransform(canvas.style.transform).k).toBe(2.5);
+
+    fireEvent.wheel(viewport, { deltaY: 1_000_000, clientX: 0, clientY: 0 });
+    expect(parseTransform(canvas.style.transform).k).toBe(0.25);
   });
 });
 

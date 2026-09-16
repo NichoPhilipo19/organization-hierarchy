@@ -69,6 +69,9 @@ Conventional Commit type the branch's work will use (see below).
 Types: `feat`, `fix`, `chore`, `docs`, `test`, `refactor`.
 
 - Subject: short, imperative, lowercase after the colon (e.g. `feat: add radial layout option`).
+- Since squash merge uses the **PR title** as this commit message, the same format applies
+  to PR titles — `.github/workflows/pr-title.yml` checks this automatically on every PR
+  (opened/edited/synchronized) and fails the check if the title doesn't match.
 - One logical change per commit — a removal and the docs update for it can share a commit;
   unrelated files should not, just because they were touched in the same sitting.
 - See `.claude/CLAUDE.md` for the exact ready-to-paste bash block shape this project uses
@@ -113,7 +116,8 @@ Recommended branch protection for `main` (GitHub → Settings → Branches):
 - Require a pull request before merging (no direct pushes, including from the owner).
 - Require status checks to pass before merging — select all four jobs from
   `.github/workflows/ci.yml` (`Lint (Biome)`, `Typecheck (tsc)`,
-  `Test (Vitest + coverage)`, `Build (demo, lib, stories)`).
+  `Test (Vitest + coverage)`, `Build (demo, lib, stories)`), plus the `Conventional Commit
+  format` job from `.github/workflows/pr-title.yml`.
 - Require branches to be up to date before merging.
 - Restrict force pushes.
 - Squash merging only — disable "Create a merge commit" and "Rebase and merge" in

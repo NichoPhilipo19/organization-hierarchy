@@ -7,3 +7,4 @@ coverage
 *.timestamp-*
 docs/frames
 docs/dbg.png
+junit.xml

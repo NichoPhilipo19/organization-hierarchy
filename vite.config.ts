@@ -17,6 +17,8 @@ export default defineConfig({
     setupFiles: ['src/test/setup.ts'],
     coverage: {
       provider: 'v8',
+      // 'json-summary' feeds the vitest-coverage-report-action PR comment in CI.
+      reporter: ['text', 'json-summary', 'json'],
       include: ['src/lib/**/*.{ts,tsx}'],
       exclude: ['src/lib/**/*.stories.*', 'src/lib/**/*.test.*', 'src/lib/index.ts'],
       thresholds: {

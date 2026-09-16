@@ -43,6 +43,13 @@ jobs:
   test:
     name: Test (Vitest + coverage)
     runs-on: ubuntu-latest
+    # checks/pull-requests write: for the two reporting steps below. Only meaningful
+    # on same-repo PRs — a fork PR's GITHUB_TOKEN is read-only regardless of this block,
+    # so both steps just no-op there instead of failing (fine for a solo-maintained repo).
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
 
@@ -55,7 +62,19 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm test:coverage
+      - run: pnpm test:coverage -- --reporter=default --reporter=junit --outputFile=./junit.xml
+
+      - name: Annotate failed tests on the PR
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Vitest Results
+          path: junit.xml
+          reporter: java-junit
+
+      - name: Comment coverage report on the PR
+        uses: davelosert/vitest-coverage-report-action@v2
+        if: always() && github.event_name == 'pull_request'
 
   build:
     name: Build (demo, lib, stories)

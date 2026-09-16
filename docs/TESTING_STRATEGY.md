@@ -11,49 +11,77 @@ its full write-up further down this document.
 
 ### High priority (blocks calling this "ready for wide use")
 
-- [ ] `src/lib/themes.ts` unit tests — new `themes.test.ts` (see "Gap analysis #1")
-- [ ] Public API surface test — new `index.test.ts` pinning `OrgChart`, `buildTree`,
+- [x] `src/lib/themes.ts` unit tests — new `themes.test.ts` (see "Gap analysis #1")
+- [x] Public API surface test — new `index.test.ts` pinning `OrgChart`, `buildTree`,
       `getThemeStyle`, `THEME_ORDER`, `THEMES` (see "Gap analysis #2")
-- [ ] Add `pnpm test:coverage` as a required step in `.github/workflows/ci.yml`
-- [ ] Add `coverage.thresholds` (90/85/90/90) scoped to `src/lib/**` in `vite.config.ts`
+- [x] Add `pnpm test:coverage` as a required step in `.github/workflows/ci.yml`
+- [x] Add `coverage.thresholds` (90/85/90/90) scoped to `src/lib/**` in `vite.config.ts`
 - [ ] Enable "Require status checks to pass" branch protection on `main` in GitHub settings
+      — a repo-settings change, not code; still open
 
 ### Medium priority (worth doing before/shortly after launch)
 
-- [ ] `OrgChart.tsx` keyboard nav: ArrowUp, Enter-without-onNodeClick, unhandled-key cases
+- [x] `OrgChart.tsx` keyboard nav: ArrowUp, Enter-without-onNodeClick, unhandled-key cases
       (see "Gap analysis #3")
-- [ ] `ZoomPane.tsx` wheel-to-zoom: cursor-anchoring + clamp behavior
+- [x] `ZoomPane.tsx` wheel-to-zoom: cursor-anchoring + clamp behavior
       (see "Gap analysis #4")
 
 ### Low priority (cheap, batch into whichever PR touches that file)
 
-- [ ] `NodeCard.tsx` — empty/whitespace `name` falls back to `node.id`
-- [ ] `ChartContext.tsx` — `useChartContext()` throws outside `<OrgChart>`
-- [ ] `buildTree.ts` — a node reachable from two different parents isn't double-visited
-- [ ] `useExpansion.ts` — controlled mode + `toggle` with no `onExpandedChange` doesn't throw
+- [x] `NodeCard.tsx` — empty/whitespace `name` falls back to `node.id` (plus an added
+      avatar-vs-initials case that surfaced as a real branch gap while writing this one)
+- [x] `ChartContext.tsx` — `useChartContext()` throws outside `<OrgChart>`
+- [x] `buildTree.ts` — a node reachable from two different parents isn't double-visited
+      — see note below; the exact `visited.has` line this targeted (buildTree.ts:59)
+      turned out to be effectively unreachable through the public API and is left as a
+      documented residual gap rather than chased further
+- [x] `useExpansion.ts` — controlled mode + `toggle` with no `onExpandedChange` doesn't
+      throw (the actual uncovered line was in the *uncontrolled* branch, not controlled —
+      the description above was slightly off; both branches are covered now)
 
 ### Status snapshot
 
-Last measured 2026-09-15: `src/lib` at 65.19% statements / 89.07% branches / 90.24%
-functions. No test files added since. Re-run `pnpm test:coverage` after each checked box
-to confirm the number actually moved.
+Last measured 2026-09-16: `src/lib` at **100% statements / 94.68% branches / 97.5%
+functions / 100% lines** (72 tests across 10 files), all above the 90/85/90/90 thresholds
+now enforced by `vite.config.ts` + CI. Remaining branch gaps are all defensive/pointer-drag
+code paths not worth the effort for a first release (see "Known residual gaps" below).
+
+### Known residual gaps (accepted, not blocking)
+
+- `buildTree.ts:59` — the stack-based `visited.has` short-circuit inside `visit()`.
+  Given this library's flat-array data model (one `parentId` per node), a `TreeNode` can
+  only ever be pushed onto the traversal stack once per `buildTree()` call, so this branch
+  guards against a case the current algorithm can't actually produce. Left in place as
+  defensive code; not worth contriving a test around.
+- `ZoomPane.tsx` touch/pointer-drag branches (lines 38, 58-59, 72, 90, 96) — pan-by-drag
+  paths, out of scope for this pass (which targeted wheel-to-zoom specifically).
+- `OrgChart.tsx:132-136` — a small branch inside an already-100%-line-covered block.
+- `types.ts` shows 0% because it's type-only (no runtime statements); this matches the
+  "explicitly out of scope" note further down this document.
 
 ## Current state
+
+> The bullets below describe the state as measured on 2026-09-15, before this plan was
+> executed — kept for context on how the gaps were found. See "Status snapshot" above for
+> where things stand now (2026-09-16: all checklist items landed except the GitHub
+> branch-protection setting, which isn't code).
 
 - 43 tests across 5 files: `buildTree.test.ts`, `helpers.test.ts`, `OrgChart.test.tsx`,
   `ZoomPane.test.tsx`, `exportImage.test.ts`.
 - All pure-logic modules under `src/lib` that already have a test file are effectively
   fully covered (`buildTree.ts`, `helpers.ts`, `exportImage.ts`, `useExpansion.ts`,
   `useOrgTree.ts` all sit at 100% statements).
-- CI (`.github/workflows/ci.yml`) runs `tsc`, `biome check`, `pnpm test`, `build`,
-  `build:lib`, and `story:build` on every push and PR — but does **not** run
-  `test:coverage`, so there is no automated signal today if a PR silently drops coverage.
+- CI (`.github/workflows/ci.yml`) ran `tsc`, `biome check`, `pnpm test`, `build`,
+  `build:lib`, and `story:build` on every push and PR — but did **not** run
+  `test:coverage`, so there was no automated signal if a PR silently dropped coverage.
+  (CI now runs `pnpm test:coverage` instead of `pnpm test`, enforcing the thresholds below.)
 - The "All files" figure from `vitest run --coverage` (32%) is misleading: it's dragged
   down by `src/demo/**`, `OrgChart.stories.tsx`, `vite.lib.config.ts`, and
   `scripts/capture-visuals.mjs` — none of which ship in the published package and none of
   which need unit coverage (demo app is a manual/visual surface, stories are for Ladle,
-  the script is a one-off screenshot tool). The number that actually matters is
-  **`src/lib` alone: 65.19% statements, 89.07% branches, 90.24% functions.**
+  the script is a one-off screenshot tool). The number that actually mattered then was
+  **`src/lib` alone: 65.19% statements, 89.07% branches, 90.24% functions** — now
+  **100% / 94.68% / 97.5% / 100%** (statements/branches/functions/lines).
 
 ## Testing shape for this project
 
@@ -262,7 +290,8 @@ Since CI already runs on every push/PR, the only workflow changes needed are:
 | Medium | `ZoomPane.tsx` wheel-zoom | ~30 min |
 | Low | 4 small edge cases (table above) | ~20 min total |
 
-Doing all of the above (roughly 2 hours of work) takes measured `src/lib` coverage from
-65%/89%/90% to effectively 100% across the board, and adds the one test type
-(`index.test.ts`) that specifically protects you from shipping an accidental breaking
-change to npm.
+Doing all of the above took measured `src/lib` coverage from 65%/89%/90% to 100%/94.68%/97.5%
+(statements/branches/functions), and added the one test type (`index.test.ts`) that
+specifically protects you from shipping an accidental breaking change to npm. All items
+are done as of 2026-09-16 except the GitHub branch-protection setting, which is a repo
+setting rather than code — see "Wiring this into the branch + PR workflow" above.

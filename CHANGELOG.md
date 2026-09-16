@@ -8,6 +8,19 @@ Follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions ≤1.
 
 - `.claude/CLAUDE.md` and `.claude/AGENTS.md` — project conventions and agent workflow guides for consistent AI-assisted contributions.
 - `CONTRIBUTING.md` — branching model (GitHub Flow) and PR workflow.
+- Test coverage per `docs/TESTING_STRATEGY.md`'s Pre-Launch Checklist: `themes.test.ts`
+  and `index.test.ts` (the two High-priority gaps — theme presets and the public API
+  surface had zero coverage before), keyboard-nav gaps in `OrgChart.test.tsx` (ArrowUp,
+  Enter-without-`onNodeClick`, an unhandled key), wheel-to-zoom in `ZoomPane.test.tsx`
+  (cursor-anchoring invariant, zoom-out direction, min/max clamp), and the remaining
+  Low-priority edge cases: `NodeCard.test.tsx` (initials fallback + avatar rendering),
+  `ChartContext.test.tsx` (`useChartContext()` throwing outside `<OrgChart>`), a
+  multi-cycle case added to `buildTree.test.ts`, and `useExpansion.test.ts` (controlled
+  and uncontrolled `toggle` with no `onExpandedChange`). `src/lib` coverage moved from
+  65.19%/89.07%/90.24% to 100%/94.68%/97.5% (statements/branches/functions).
+- `coverage.thresholds` (90/85/90/90, scoped to `src/lib/**`) in `vite.config.ts`, and
+  `.github/workflows/ci.yml` now runs `pnpm test:coverage` instead of `pnpm test`, so a PR
+  that drops coverage below those thresholds fails CI automatically.
 
 ### Changed
 

@@ -4,8 +4,18 @@ Follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions ≤1.
 
 ## [Unreleased]
 
+### Added
+
+- `.claude/CLAUDE.md` and `.claude/AGENTS.md` — project conventions and agent workflow guides for consistent AI-assisted contributions.
+- `CONTRIBUTING.md` — branching model (GitHub Flow) and PR workflow.
+
+### Changed
+
+- Moved `PRD.md`, `TECHNICAL_DESIGN.md`, `ANALYSIS.md`, `COMPETITIVE_ANALYSIS.md`, and `TESTING_STRATEGY.md` into `docs/`, alongside the existing README screenshots/GIFs.
+
 ### Removed
 
+- `CLAUDE_CODE_PROMPTS.md` — no longer used.
 - The `ormas` theme preset — removed from `THEMES`/`THEME_ORDER` (a breaking change for anyone already using `getThemeStyle('ormas')`; it never shipped in a published version, so this is safe).
 
 ## [1.2.0] — 2026-09-15

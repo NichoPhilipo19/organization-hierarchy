@@ -1,7 +1,7 @@
 /**
  * Exports the chart to PNG (FR-12). `html-to-image` is dynamically imported so
  * consumers who never call exportToPng don't pay its bundle cost —
- * see TECHNICAL_DESIGN.md §Export.
+ * see docs/TECHNICAL_DESIGN.md §Export.
  */
 export async function exportChartToPng(
   target: HTMLElement | null,

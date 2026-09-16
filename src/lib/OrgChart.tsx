@@ -26,7 +26,7 @@ function flattenVisible(roots: TreeNode[], expanded: ReadonlySet<string>): TreeN
 
 /**
  * <OrgChart data={flatArray} /> — a ready-to-use org chart (US-1).
- * See PRD.md & TECHNICAL_DESIGN.md for design decisions.
+ * See docs/PRD.md & docs/TECHNICAL_DESIGN.md for design decisions.
  */
 export const OrgChart = forwardRef<OrgChartHandle, OrgChartProps>(function OrgChart(
   {
@@ -204,7 +204,7 @@ export const OrgChart = forwardRef<OrgChartHandle, OrgChartProps>(function OrgCh
       <ul
         ref={treeRef}
         className={s.root}
-        // biome-ignore lint/a11y/noNoninteractiveElementToInteractiveRole: standard WAI-ARIA treeview pattern (ul[role=tree] > li[role=treeitem]), see TECHNICAL_DESIGN.md section 4
+        // biome-ignore lint/a11y/noNoninteractiveElementToInteractiveRole: standard WAI-ARIA treeview pattern (ul[role=tree] > li[role=treeitem]), see docs/TECHNICAL_DESIGN.md section 4
         role="tree"
         aria-label="Organization chart"
         onKeyDown={onTreeKeyDown}

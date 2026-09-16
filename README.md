@@ -168,7 +168,7 @@ const chartRef = useRef<OrgChartHandle>(null);
 <OrgChart ref={chartRef} data={data} />;
 ```
 
-Captures the tree as currently rendered (visible nodes only — collapsed subtrees simply aren't rendered, so they're automatically excluded), at natural resolution, regardless of `ZoomPane`'s current zoom/pan state. Rejects with an error if the chart isn't mounted yet (e.g. `data` is empty). Uses the small `html-to-image` library, *dynamically imported* inside the method itself — consumers who never call `exportToPng` don't download this dependency at all (see TECHNICAL_DESIGN.md §7b).
+Captures the tree as currently rendered (visible nodes only — collapsed subtrees simply aren't rendered, so they're automatically excluded), at natural resolution, regardless of `ZoomPane`'s current zoom/pan state. Rejects with an error if the chart isn't mounted yet (e.g. `data` is empty). Uses the small `html-to-image` library, *dynamically imported* inside the method itself — consumers who never call `exportToPng` don't download this dependency at all (see docs/TECHNICAL_DESIGN.md §7b).
 
 ## Performance (measured, not claimed)
 
@@ -185,11 +185,14 @@ Collapsed subtrees are not rendered to the DOM, so cost follows the number of *v
 
 ## Roadmap
 
-A radial view (SVG renderer, shared hooks) and publishing to npm are next — see TECHNICAL_DESIGN.md §8.
+A radial view (SVG renderer, shared hooks) and publishing to npm are next — see docs/TECHNICAL_DESIGN.md §8.
 
 ## Documentation
 
-- **[PRD.md](PRD.md)** — requirements & user stories (FR-x/NFR-x), including scope deliberately deferred (radial view, npm publish).
-- **[TECHNICAL_DESIGN.md](TECHNICAL_DESIGN.md)** — design decisions and their reasoning: why a flat array, why CSS connectors instead of SVG, why logic is separated from the view.
-- **[ANALYSIS.md](ANALYSIS.md)** — traces PRD → design → code → test per ID, and logs bugs found along with how they were fixed.
+- **[PRD.md](docs/PRD.md)** — requirements & user stories (FR-x/NFR-x), including scope deliberately deferred (radial view, npm publish).
+- **[TECHNICAL_DESIGN.md](docs/TECHNICAL_DESIGN.md)** — design decisions and their reasoning: why a flat array, why CSS connectors instead of SVG, why logic is separated from the view.
+- **[ANALYSIS.md](docs/ANALYSIS.md)** — traces PRD → design → code → test per ID, and logs bugs found along with how they were fixed.
+- **[COMPETITIVE_ANALYSIS.md](docs/COMPETITIVE_ANALYSIS.md)** — how this lib compares to other React/D3 org chart libraries.
+- **[TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md)** — pre-launch test plan and coverage gap analysis.
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** — branching model and how to open a PR.
 - **[CHANGELOG.md](CHANGELOG.md)** — change history per release.

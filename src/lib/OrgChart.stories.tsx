@@ -7,7 +7,7 @@ import { getThemeStyle, THEME_ORDER } from './themes';
 
 /**
  * One story per state (rather than one combined demo page) — see the
- * wishlist in TECHNICAL_DESIGN.md §8: each theme preset, custom renderNode,
+ * wishlist in docs/TECHNICAL_DESIGN.md §8: each theme preset, custom renderNode,
  * dirty dataset, and zoom & pan are deliberately kept separate for easy comparison.
  */
 

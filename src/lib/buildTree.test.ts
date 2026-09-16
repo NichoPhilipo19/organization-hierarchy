@@ -95,6 +95,29 @@ describe('buildTree', () => {
   });
 });
 
+it('resolves two independent cycles in the same call without cross-visiting each other', () => {
+  // Two disjoint 2-node cycles, unreachable from any root, plus a normal
+  // rooted tree — exercises the recovery loop running more than once in a
+  // single buildTree() call (the stack-based visited tracking must not let
+  // one cycle's recovery walk bleed into the other's).
+  const { roots, errors } = buildTree([
+    n('ceo', null),
+    n('cto', 'ceo'),
+    n('p', 'q'),
+    n('q', 'p'),
+    n('r', 's'),
+    n('s', 'r'),
+  ]);
+  expect(errors.filter((e) => e.type === 'cycle')).toHaveLength(2);
+  const ids = new Set<string>();
+  const collect = (t: (typeof roots)[number]) => {
+    ids.add(t.node.id);
+    t.children.forEach(collect);
+  };
+  roots.forEach(collect);
+  expect(ids).toEqual(new Set(['ceo', 'cto', 'p', 'q', 'r', 's']));
+});
+
 describe('idsUpToDepth', () => {
   const { roots } = buildTree([
     n('ceo', null),

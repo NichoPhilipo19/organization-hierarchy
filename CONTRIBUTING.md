@@ -42,12 +42,16 @@ Conventional Commit type the branch's work will use (see below).
    ```bash
    pnpm exec tsc --noEmit
    pnpm exec biome check .
-   pnpm test
+   pnpm test:coverage
    pnpm build
    pnpm build:lib
    pnpm story:build
    ```
-   This is exactly what CI runs — catching a failure locally is faster than waiting on CI.
+   This is what CI runs, split across four independent jobs (`lint`, `typecheck`, `test`,
+   `build`) so a PR's Checks tab shows exactly which one failed instead of one opaque
+   `verify` job — catching a failure locally is still faster than waiting on CI either way.
+   `pnpm test:coverage` also enforces the `coverage.thresholds` in `vite.config.ts`; a PR
+   that drops `src/lib` coverage below them fails the `test` job.
 4. Push the branch and open a PR against `main`.
 5. Once CI is green, **squash merge**. Use the PR title as the squash commit's subject
    line, in Conventional Commit format (see below) — this is what ends up in `main`'s
@@ -107,8 +111,9 @@ Releases are cut from `main`, never from a feature branch directly:
 Recommended branch protection for `main` (GitHub → Settings → Branches):
 
 - Require a pull request before merging (no direct pushes, including from the owner).
-- Require status checks to pass before merging — select the CI job from
-  `.github/workflows/ci.yml`.
+- Require status checks to pass before merging — select all four jobs from
+  `.github/workflows/ci.yml` (`Lint (Biome)`, `Typecheck (tsc)`,
+  `Test (Vitest + coverage)`, `Build (demo, lib, stories)`).
 - Require branches to be up to date before merging.
 - Restrict force pushes.
 - Squash merging only — disable "Create a merge commit" and "Rebase and merge" in

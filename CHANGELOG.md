@@ -25,6 +25,7 @@ Follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions ≤1.
 ### Changed
 
 - Moved `PRD.md`, `TECHNICAL_DESIGN.md`, `ANALYSIS.md`, `COMPETITIVE_ANALYSIS.md`, and `TESTING_STRATEGY.md` into `docs/`, alongside the existing README screenshots/GIFs.
+- Split `.github/workflows/ci.yml`'s single `verify` job into four independent jobs — `lint`, `typecheck`, `test`, and `build` (the last depending on the first three) — so a failing PR check names the actual failure (e.g. "Test (Vitest + coverage)") instead of one opaque `verify`, and unrelated checks (lint, typecheck, test) run in parallel instead of one long sequential job.
 
 ### Removed
 

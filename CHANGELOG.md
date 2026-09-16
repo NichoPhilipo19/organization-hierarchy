@@ -21,11 +21,21 @@ Follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions ≤1.
 - `coverage.thresholds` (90/85/90/90, scoped to `src/lib/**`) in `vite.config.ts`, and
   `.github/workflows/ci.yml` now runs `pnpm test:coverage` instead of `pnpm test`, so a PR
   that drops coverage below those thresholds fails CI automatically.
+- `.github/workflows/ci.yml`'s `test` job now annotates failed tests directly on the PR
+  (`dorny/test-reporter`, fed by Vitest's `junit` reporter) and comments a per-file
+  coverage report on every PR (`davelosert/vitest-coverage-report-action`, fed by the new
+  `json-summary` coverage reporter in `vite.config.ts`) — a failure now shows exactly
+  which test broke and how coverage moved, instead of just a red check.
+- `.github/workflows/pr-title.yml` — checks every PR title against the Conventional
+  Commit format from `CONTRIBUTING.md` (since squash merge uses the PR title as the
+  commit message on `main`).
 
 ### Changed
 
 - Moved `PRD.md`, `TECHNICAL_DESIGN.md`, `ANALYSIS.md`, `COMPETITIVE_ANALYSIS.md`, and `TESTING_STRATEGY.md` into `docs/`, alongside the existing README screenshots/GIFs.
+- Translated the remaining Bahasa Indonesia UI strings in the demo app (`src/demo/App.tsx`: theme label, dataset switch buttons, search placeholder, result count, data-error banner, node-clicked banner, export-failure log; `src/demo/sample-data.ts`: a header comment) to English, per `.claude/CLAUDE.md`'s all-English-in-files rule. Missed by the earlier repo-wide translation sweep.
 - Split `.github/workflows/ci.yml`'s single `verify` job into four independent jobs — `lint`, `typecheck`, `test`, and `build` (the last depending on the first three) — so a failing PR check names the actual failure (e.g. "Test (Vitest + coverage)") instead of one opaque `verify`, and unrelated checks (lint, typecheck, test) run in parallel instead of one long sequential job.
+- `.github/workflows/deploy-demo.yml` now runs `pnpm test:coverage` instead of the older `pnpm test -- --run`, matching `ci.yml`.
 
 ### Removed
 

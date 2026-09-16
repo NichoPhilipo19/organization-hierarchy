@@ -4,6 +4,40 @@ This document is the pre-launch test plan for `org-hierarchy-tree`. It is based 
 measured coverage run (`pnpm test:coverage`, 2026-09-15), not a guess — every gap below
 is a real uncovered line, not a hypothetical one.
 
+## Pre-Launch Checklist
+
+Living checklist — check items off as they land, in priority order. Each item links to
+its full write-up further down this document.
+
+### High priority (blocks calling this "ready for wide use")
+
+- [ ] `src/lib/themes.ts` unit tests — new `themes.test.ts` (see "Gap analysis #1")
+- [ ] Public API surface test — new `index.test.ts` pinning `OrgChart`, `buildTree`,
+      `getThemeStyle`, `THEME_ORDER`, `THEMES` (see "Gap analysis #2")
+- [ ] Add `pnpm test:coverage` as a required step in `.github/workflows/ci.yml`
+- [ ] Add `coverage.thresholds` (90/85/90/90) scoped to `src/lib/**` in `vite.config.ts`
+- [ ] Enable "Require status checks to pass" branch protection on `main` in GitHub settings
+
+### Medium priority (worth doing before/shortly after launch)
+
+- [ ] `OrgChart.tsx` keyboard nav: ArrowUp, Enter-without-onNodeClick, unhandled-key cases
+      (see "Gap analysis #3")
+- [ ] `ZoomPane.tsx` wheel-to-zoom: cursor-anchoring + clamp behavior
+      (see "Gap analysis #4")
+
+### Low priority (cheap, batch into whichever PR touches that file)
+
+- [ ] `NodeCard.tsx` — empty/whitespace `name` falls back to `node.id`
+- [ ] `ChartContext.tsx` — `useChartContext()` throws outside `<OrgChart>`
+- [ ] `buildTree.ts` — a node reachable from two different parents isn't double-visited
+- [ ] `useExpansion.ts` — controlled mode + `toggle` with no `onExpandedChange` doesn't throw
+
+### Status snapshot
+
+Last measured 2026-09-15: `src/lib` at 65.19% statements / 89.07% branches / 90.24%
+functions. No test files added since. Re-run `pnpm test:coverage` after each checked box
+to confirm the number actually moved.
+
 ## Current state
 
 - 43 tests across 5 files: `buildTree.test.ts`, `helpers.test.ts`, `OrgChart.test.tsx`,

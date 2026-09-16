@@ -1,7 +1,7 @@
 import type { OrgNode } from '../lib';
 
 /**
- * Dummy data: 2 company (multi-root), ±50 node, 4 level.
+ * Dummy data: 2 companies (multi-root), ~50 nodes, 4 levels.
  * Covers visual cases: only-child, 2 children, many children, deep subtree.
  */
 

@@ -154,7 +154,7 @@ export function App() {
         </h1>
         <p style={{ margin: 0, color: theme.page.muted, fontSize: 14 }}>
           Multi-company · collapse/expand · controlled state · dirty-data handling · search · zoom
-          &amp; pan · keyboard navigation (Tab lalu arrow keys)
+          &amp; pan · keyboard navigation (Tab, then arrow keys)
         </p>
       </header>
 
@@ -176,7 +176,7 @@ export function App() {
             color: theme.page.muted,
           }}
         >
-          Tema:
+          Theme:
           <select
             value={themeId}
             onChange={(e) => setThemeId(e.target.value as ThemeId)}
@@ -201,7 +201,7 @@ export function App() {
           disabled={dataset === 'clean'}
           style={dataset === 'clean' ? activeControlStyle : controlStyle}
         >
-          Dataset bersih (2 company, ±50 node)
+          Clean dataset (2 companies, ~50 nodes)
         </button>
         <button
           type="button"
@@ -209,7 +209,7 @@ export function App() {
           disabled={dataset === 'dirty'}
           style={dataset === 'dirty' ? activeControlStyle : controlStyle}
         >
-          Dataset kotor (orphan/cycle/duplicate)
+          Dirty dataset (orphan/cycle/duplicate)
         </button>
         <span style={{ width: 16 }} />
         <button type="button" onClick={() => setExpanded(new Set(allIds))} style={controlStyle}>
@@ -226,7 +226,7 @@ export function App() {
           onClick={() =>
             chartRef.current
               ?.exportToPng('org-chart.png')
-              .catch((err: unknown) => console.error('Export gagal:', err))
+              .catch((err: unknown) => console.error('Export failed:', err))
           }
           style={activeControlStyle}
         >
@@ -251,14 +251,14 @@ export function App() {
         </label>
         <input
           type="search"
-          placeholder="Cari nama/jabatan…"
+          placeholder="Search name/title…"
           value={query}
           onChange={(e) => runSearch(e.target.value)}
           style={inputStyle}
         />
         {highlightedIds && (
           <span style={{ fontSize: 13, color: theme.page.muted, alignSelf: 'center' }}>
-            {highlightedIds.size} hasil
+            {highlightedIds.size} results
           </span>
         )}
       </div>
@@ -275,7 +275,7 @@ export function App() {
             fontSize: 13,
           }}
         >
-          <strong>{errors.length} data issue(s) ditemukan</strong> — chart tetap dirender:
+          <strong>{errors.length} data issue(s) found</strong> — chart still rendered:
           <ul style={{ margin: '4px 0 0', paddingLeft: 18 }}>
             {errors.map((e) => (
               <li key={`${e.type}:${e.message}`}>
@@ -297,10 +297,10 @@ export function App() {
             fontSize: 13,
           }}
         >
-          Node diklik: <strong>{selected.name}</strong>
+          Node clicked: <strong>{selected.name}</strong>
           {selected.title ? ` — ${selected.title}` : ''}{' '}
           <button type="button" onClick={() => setSelected(null)}>
-            tutup
+            close
           </button>
         </div>
       )}

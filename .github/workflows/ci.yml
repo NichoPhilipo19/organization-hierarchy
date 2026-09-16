@@ -24,7 +24,7 @@ jobs:
 
       - run: pnpm exec biome check .
 
-      - run: pnpm test -- --run
+      - run: pnpm test:coverage
 
       - run: pnpm build
 

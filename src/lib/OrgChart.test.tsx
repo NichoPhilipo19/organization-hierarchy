@@ -193,6 +193,53 @@ describe('OrgChart — keyboard navigation (US-11, WAI-ARIA tree)', () => {
     expect(item('Cee O')).toHaveFocus();
   });
 
+  it('ArrowUp moves focus to the previous visible sibling', async () => {
+    const user = userEvent.setup();
+    render(<OrgChart data={data} />);
+
+    await user.tab(); // Cee O
+    await user.keyboard('{ArrowDown}'); // Tee O
+    await user.keyboard('{ArrowDown}'); // Ef O
+    expect(item('Ef O')).toHaveFocus();
+
+    await user.keyboard('{ArrowUp}');
+    expect(item('Tee O')).toHaveFocus();
+
+    await user.keyboard('{ArrowUp}');
+    expect(item('Cee O')).toHaveFocus();
+  });
+
+  it('ArrowUp at the first visible node is a no-op', async () => {
+    const user = userEvent.setup();
+    render(<OrgChart data={data} />);
+    await user.tab();
+    expect(item('Cee O')).toHaveFocus();
+    await user.keyboard('{ArrowUp}');
+    expect(item('Cee O')).toHaveFocus();
+  });
+
+  it('Enter toggles expansion when there is no onNodeClick', async () => {
+    const user = userEvent.setup();
+    render(<OrgChart data={data} />);
+    await user.tab(); // Cee O
+    await user.keyboard('{ArrowDown}'); // Tee O — has children, collapsed
+    expect(screen.queryByText('Eng One')).not.toBeInTheDocument();
+
+    await user.keyboard('{Enter}');
+    expect(screen.getByText('Eng One')).toBeInTheDocument();
+  });
+
+  it('an unhandled key does not change expansion state or throw', async () => {
+    const user = userEvent.setup();
+    render(<OrgChart data={data} />);
+    await user.tab();
+    expect(() => {}).not.toThrow(); // sanity: reaching here means tab() didn't throw
+    await user.keyboard('a');
+    // 'a' isn't a navigation key — nothing should have expanded or moved focus.
+    expect(item('Cee O')).toHaveFocus();
+    expect(screen.queryByText('Eng One')).not.toBeInTheDocument();
+  });
+
   it('Enter activates onNodeClick from keyboard', async () => {
     const user = userEvent.setup();
     const onClick = vi.fn();

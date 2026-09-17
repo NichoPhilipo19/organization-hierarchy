@@ -38,6 +38,15 @@ Follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions ≤1.
 - Translated the remaining Bahasa Indonesia UI strings in the demo app (`src/demo/App.tsx`: theme label, dataset switch buttons, search placeholder, result count, data-error banner, node-clicked banner, export-failure log; `src/demo/sample-data.ts`: a header comment) to English, per `.claude/CLAUDE.md`'s all-English-in-files rule. Missed by the earlier repo-wide translation sweep.
 - Split `.github/workflows/ci.yml`'s single `verify` job into four independent jobs — `lint`, `typecheck`, `test`, and `build` (the last depending on the first three) — so a failing PR check names the actual failure (e.g. "Test (Vitest + coverage)") instead of one opaque `verify`, and unrelated checks (lint, typecheck, test) run in parallel instead of one long sequential job.
 - `.github/workflows/deploy-demo.yml` now runs `pnpm test:coverage` instead of the older `pnpm test -- --run`, matching `ci.yml`.
+- Bumped the Node version all workflows run on from 20 to 22 (`CONTRIBUTING.md` updated to match) — unrelated to the junit fix below, but GitHub had started warning that Node 20 support for Actions is being phased out.
+
+### Fixed
+
+- The `test` job's `dorny/test-reporter` step failed with "No test report files were
+  found": `junit.xml` was requested via CLI flags appended to `pnpm test:coverage -- ...`,
+  which didn't reliably produce the file. Moved the junit reporter into `vite.config.ts`
+  instead, gated on `process.env.CI`, so `pnpm test:coverage` alone produces `junit.xml`
+  in CI (and nothing extra locally), regardless of how vitest is invoked.
 
 ### Removed
 

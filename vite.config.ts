@@ -15,6 +15,12 @@ export default defineConfig({
     // Component tests (interaction) need a DOM
     environmentMatchGlobs: [['src/**/*.test.tsx', 'jsdom']],
     setupFiles: ['src/test/setup.ts'],
+    // In CI, also emit a junit.xml alongside the console output — dorny/test-reporter
+    // (see .github/workflows/ci.yml) turns it into per-test PR annotations. Baked in
+    // here (rather than passed as CLI flags through `pnpm test:coverage -- ...`) so it
+    // behaves identically whether vitest is invoked directly or through a script/pnpm.
+    reporters: process.env.CI ? ['default', 'junit'] : ['default'],
+    outputFile: process.env.CI ? { junit: './junit.xml' } : undefined,
     coverage: {
       provider: 'v8',
       // 'json-summary' feeds the vitest-coverage-report-action PR comment in CI.

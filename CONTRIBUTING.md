@@ -6,7 +6,7 @@ formality, and keeps `main` in a state that's always safe to publish to npm.
 
 ## Prerequisites
 
-- Node 20+ (CI runs on Node 20)
+- Node 20+ (CI runs on Node 22)
 - pnpm — version pinned by the `packageManager` field in `package.json`; run
   `corepack enable` once and pnpm will resolve to the right version automatically
 

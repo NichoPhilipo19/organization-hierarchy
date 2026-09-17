@@ -1,6 +1,6 @@
 # org-hierarchy-tree
 
-A reusable React component for rendering an organization hierarchy from **flat data** — org chart, reporting lines, multi-company structures. Zero runtime dependency (React is a peer), fully typed, ~5 kB gzip.
+A reusable React component for rendering an organization hierarchy from **flat data** — org chart, reporting lines, multi-company structures. Zero required runtime dependency (React is the only peer), fully typed, ~5 kB gzip. (`html-to-image` is dynamically imported only if you call `exportToPng` — see "Export to PNG" below — so it never touches your bundle otherwise.)
 
 **🔗 <a href="https://nichophilipo19.github.io/organization-hierarchy/" target="_blank" rel="noopener noreferrer">Live demo</a>** — expand/collapse, search, zoom & pan right in your browser.
 
@@ -42,7 +42,7 @@ Per-node collapse/expand with a direct-report count badge · multiple roots (mul
 ```bash
 pnpm install
 pnpm dev        # Vite demo: 2 companies, ~50 nodes, dirty dataset, search, zoom
-pnpm test           # 32 unit + component tests
+pnpm test           # 72 unit + component tests
 pnpm bench      # buildTree & render benchmarks
 pnpm build:lib  # → dist-lib/ (index.js + index.d.ts + style.css)
 pnpm visuals    # regenerate the README screenshot/GIF (needs npx playwright install chromium)
@@ -185,7 +185,7 @@ Collapsed subtrees are not rendered to the DOM, so cost follows the number of *v
 
 ## Roadmap
 
-A radial view (SVG renderer, shared hooks) and publishing to npm are next — see docs/TECHNICAL_DESIGN.md §8.
+A radial view (SVG renderer, shared hooks) is next — see docs/TECHNICAL_DESIGN.md §8.
 
 ## Documentation
 

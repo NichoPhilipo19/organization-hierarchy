@@ -19,7 +19,7 @@ This project builds a **reusable React component** for rendering an organization
 | G1 | Render a top-down org tree with visual connectors | A tree with 3+ levels renders correctly without broken layout |
 | G2 | Collapse/expand per node | Toggle works on a tree of ~100 nodes with no perceptible lag (<16ms per toggle) |
 | G3 | Multi-company / multiple roots | ≥2 roots render side by side from a single dataset |
-| G4 | Zero runtime dependency other than React | `dependencies` in package.json contains only the React peer |
+| G4 | Zero *required* runtime dependency other than React | `dependencies` in package.json contains no eagerly-loaded runtime dependency — `html-to-image` is present but reached only via a dynamic `import()` inside `exportToPng` (NFR-2) |
 | G5 | Consumers can fully customize node appearance | `renderNode` override works without CSS hacks |
 | G6 | Dirty data does not break rendering | Orphans/cycles/duplicates are handled + reported |
 
@@ -82,7 +82,7 @@ This project builds a **reusable React component** for rendering an organization
 | ID | Requirement |
 |---|---|
 | NFR-1 | **Performance:** a 100-node dataset with 20% expanded → initial render < 100ms on modern hardware; toggle < 16ms |
-| NFR-2 | **Dependency:** zero runtime dependency (React as peer) |
+| NFR-2 | **Dependency:** zero *required* runtime dependency (React as peer); `html-to-image` is dynamically imported, only for `exportToPng` (FR-12) — a consumer who never calls it never downloads it |
 | NFR-3 | **Type safety:** public API fully typed, strict mode, no `any` on the public surface |
 | NFR-4 | **Accessibility:** ARIA tree semantics, keyboard-operable toggle (P1) |
 | NFR-5 | **Browser:** evergreen browsers (latest Chrome/Firefox/Safari/Edge); no IE support |

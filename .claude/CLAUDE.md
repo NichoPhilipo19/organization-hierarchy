@@ -12,7 +12,9 @@ Project memory for Claude Code. Read this before doing any work on `org-hierarch
 ## Project Overview
 
 `org-hierarchy-tree` — a React component library: flat array of org-node data in, an
-interactive org chart out. Zero runtime dependencies (React is a peer dependency only).
+interactive org chart out. Zero *required* runtime dependencies — React is the only peer
+dependency; `html-to-image` is a real `dependencies` entry but reached only via a dynamic
+`import()` inside `exportToPng`, so it never enters a consumer's bundle unless they call it.
 Published to npm. Solo-maintained, portfolio project — treat every change to `src/lib` as
 public API surface with real semver consequences.
 
@@ -46,7 +48,7 @@ re-exported there, consumers can't reach it, however public the file looks.
 
 | Rule | Detail |
 |------|--------|
-| **Zero runtime dependencies** | `src/lib` ships with React as its only peer dependency. Never add a new runtime dependency to `src/lib` without asking first and explaining why — this is a stated design goal (see docs/TECHNICAL_DESIGN.md), not a style preference. `src/demo` and dev tooling are not held to this. |
+| **Zero *required* runtime dependencies** | `src/lib` ships with React as its only peer dependency. The one accepted exception is `html-to-image`, dynamically imported inside `exportImage.ts` for `exportToPng` — it's a real `dependencies` entry, but Rollup splits it into its own chunk, so a consumer who never calls `exportToPng` never downloads it (docs/TECHNICAL_DESIGN.md §7b). Never add another runtime dependency to `src/lib` — new or eager — without asking first and explaining why; this is a stated design goal, not a style preference. `src/demo` and dev tooling are not held to this. |
 | **Public API changes are semver events** | Removing/renaming an export, prop, or theme id from `src/lib` is a breaking change unless it never shipped in a published version. Check `CHANGELOG.md`'s latest published version before assuming something is safe to change freely. |
 | **WAI-ARIA treeview pattern** | `role="tree"` / `role="treeitem"` / `role="group"` + roving tabindex in `OrgChart.tsx`/`TreeView.tsx` is load-bearing accessibility behavior, not incidental markup. Don't refactor it away without re-reading docs/TECHNICAL_DESIGN.md §4. |
 | **Theming via CSS custom properties only** | Never hardcode a color/size in `OrgChart.module.css` that a theme should be able to override — it must be a `var(--orgchart-*, <fallback>)`. See `src/lib/themes.ts`. |

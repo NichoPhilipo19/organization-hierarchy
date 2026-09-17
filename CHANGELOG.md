@@ -33,6 +33,8 @@ Follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions ≤1.
 ### Changed
 
 - Moved `PRD.md`, `TECHNICAL_DESIGN.md`, `ANALYSIS.md`, `COMPETITIVE_ANALYSIS.md`, and `TESTING_STRATEGY.md` into `docs/`, alongside the existing README screenshots/GIFs.
+- Reworded the "zero runtime dependency" claim in `README.md`, `docs/PRD.md` (G4/NFR-2), and `.claude/CLAUDE.md` to "zero *required* runtime dependency" — `html-to-image` has been a real (non-dev) `dependencies` entry since `exportToPng` shipped in 1.2.0, dynamically imported so it never enters a consumer's bundle unless they call that method. `docs/TECHNICAL_DESIGN.md` already documented this accurately; the other docs still claimed an unqualified zero.
+- Fixed a stale test count (`README.md`: 32 → 72) and removed "publishing to npm" from the Roadmap section now that it's actually happening.
 - Translated the remaining Bahasa Indonesia UI strings in the demo app (`src/demo/App.tsx`: theme label, dataset switch buttons, search placeholder, result count, data-error banner, node-clicked banner, export-failure log; `src/demo/sample-data.ts`: a header comment) to English, per `.claude/CLAUDE.md`'s all-English-in-files rule. Missed by the earlier repo-wide translation sweep.
 - Split `.github/workflows/ci.yml`'s single `verify` job into four independent jobs — `lint`, `typecheck`, `test`, and `build` (the last depending on the first three) — so a failing PR check names the actual failure (e.g. "Test (Vitest + coverage)") instead of one opaque `verify`, and unrelated checks (lint, typecheck, test) run in parallel instead of one long sequential job.
 - `.github/workflows/deploy-demo.yml` now runs `pnpm test:coverage` instead of the older `pnpm test -- --run`, matching `ci.yml`.
